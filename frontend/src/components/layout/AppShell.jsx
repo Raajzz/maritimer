@@ -17,6 +17,7 @@ import { NavLink, Outlet } from "react-router-dom";
 
 import { useAuth } from "../../hooks/useAuth";
 import { initials } from "../../lib/format";
+import ThemeToggle from "../ThemeToggle";
 import { Button } from "../ui";
 
 // Primary destinations per role; the first four also appear in the mobile tab bar.
@@ -88,6 +89,7 @@ export function AppShell() {
           <Logo />
           <span className="spacer" />
           <span className="small muted truncate" style={{ maxWidth: 180 }}>{me.user.role.toLowerCase()}</span>
+          <ThemeToggle />
           <span className="avatar" title={me.user.display_name || me.user.email}>
             {me.user.photo_url ? <img src={me.user.photo_url} alt="" referrerPolicy="no-referrer" /> : initials(me.user.display_name || me.user.email)}
           </span>

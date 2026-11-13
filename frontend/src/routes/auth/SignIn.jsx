@@ -6,7 +6,9 @@ import { useAction } from "../../hooks/useAction";
 import { useAuth } from "../../hooks/useAuth";
 import { devAuthEnabled, firebaseEnabled } from "../../lib/firebase";
 
-const DEMO_USERS = [
+// Only present in builds made with VITE_DEV_AUTH=true. Vite replaces the env check with a constant at
+// build time, so production bundles contain neither these addresses nor the dev sign-in UI.
+const DEMO_USERS = import.meta.env.VITE_DEV_AUTH !== "true" ? [] : [
   ["Owner", "owner.demo@maritimer.test"],
   ["Port agent", "agent.demo@maritimer.test"],
   ["Merchant · pilots & tugs", "pilots.demo@maritimer.test"],
@@ -45,7 +47,7 @@ export default function SignIn({ error }) {
         ) : (
           <Alert tone="warn">Google sign-in is not configured. Set the VITE_FIREBASE_* variables.</Alert>
         )}
-        {devAuthEnabled && (
+        {import.meta.env.VITE_DEV_AUTH === "true" && devAuthEnabled && (
           <div className="stack-sm">
             <div className="divider" />
             <div className="small strong">Development sign-in</div>

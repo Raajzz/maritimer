@@ -2,9 +2,9 @@
 :root {
   --color-primary: #0B3C5D;      /* nav, headings, primary buttons — white text 11:1 */
   --color-primary-hover: #082D46;
-  --color-accent:  #0E8A9A;      /* links, active states, secondary actions — white text 4.6:1 */
+  --color-accent:  #0E8A9A;      /* focus rings, borders, icons — white text on it is only 4.1:1, so solid buttons use accent-hover */
   --color-accent-hover: #0B7380;
-  --color-cta:     #FF6B1A;      /* primary CTA + alerts needing action — dark text only (6.5:1) */
+  --color-cta:     #FF6B1A;      /* primary CTA + alerts needing action — dark text only (5.45:1) */
   --color-cta-hover: #F05A08;
   --color-success: #2E9E5B;      /* icons/badges with dark text; not body text */
   --color-error:   #D93636;      /* 4.9:1 on white */
@@ -38,4 +38,51 @@
   --sidebar-w: 248px; --topbar-h: 56px; --tabbar-h: 60px;
   --content-max: 1280px;
   --touch: 44px;
+}
+
+/* Semantic tokens (light defaults). Components use these, so the dark theme only swaps values. */
+:root {
+  --color-heading: var(--color-primary);  /* headings, primary-coloured text */
+  --color-on-primary: #FFFFFF;
+  --color-on-cta: #1A2530;                /* CTA buttons always use dark text on orange (5.45:1) */
+  --color-sidebar: var(--color-primary);
+  --color-col: #EAEFF4;                   /* pipeline columns */
+  --color-error-text: #A32424;
+  --color-neutral-soft: #EEF1F4;
+  --color-neutral-text: #3D4B58;
+  --border-error: #F2C4C4; --border-info: #BFE3E7; --border-warn: #FFD3B8; --border-success: #BFE3CC;
+  --color-overlay: rgba(26, 37, 48, .45);
+  color-scheme: light;
+}
+
+/* Dark theme. Brand hues kept; surfaces darkened; text colours lightened. Contrast (WCAG AA):
+   text #E3EAF0 on surface #16202A 13.6:1 · muted #9AABBA on surface 7.0:1 · heading #9CCBEA on bg 10.6:1
+   white on primary button #1F5F8B 6.8:1 · soft-badge texts on their dark soft backgrounds 7.5–8.6:1 (computed) */
+:root[data-theme="dark"] {
+  --color-bg: #0E151B;
+  --color-surface: #16202A;
+  --color-text: #E3EAF0;
+  --color-muted: #9AABBA;
+  --color-border: #2A3947;
+  --color-heading: #9CCBEA;
+  --color-primary: #1F5F8B;
+  --color-primary-hover: #2A73A6;
+  --color-sidebar: #0A1A26;
+  --color-col: #111B23;
+  --color-primary-soft: #16324A;
+  --color-accent-soft: #0E3338;
+  --color-cta-soft: #3A2416;
+  --color-success-soft: #123321;
+  --color-error-soft: #3A1A1A;
+  --color-neutral-soft: #24313D;
+  --color-neutral-text: #C5D1DB;
+  --color-accent-text: #5FD0DD;
+  --color-cta-text: #FFB58A;
+  --color-success-text: #6FD49A;
+  --color-error-text: #FF9C9C;
+  --border-error: #5C2A2A; --border-info: #1D4B52; --border-warn: #5C3A22; --border-success: #22513A;
+  --color-overlay: rgba(0, 0, 0, .6);
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, .4);
+  --shadow-pop: 0 10px 30px rgba(0, 0, 0, .55);
+  color-scheme: dark;
 }

@@ -243,10 +243,12 @@ dense but readable tables that collapse to cards on mobile.
 }
 ```
 
-**Contrast (WCAG AA, checked):** text `#1A2530` on `#F4F7FA` ≈ 14:1; white on primary `#0B3C5D`
-≈ 11:1; white on accent `#0E8A9A` ≈ 4.6:1 (AA normal text, OK); **white on CTA `#FF6B1A` is only
-≈ 2.9:1 → CTA buttons use text `#1A2530` on `#FF6B1A` (≈ 6.5:1)** or the CTA color is used for
-borders/icons with dark text. Error `#D93636` on white ≈ 4.9:1 (OK). Success `#2E9E5B` on white ≈
+**Contrast (WCAG AA, computed):** text `#1A2530` on `#F4F7FA` ≈ 14:1; white on primary `#0B3C5D`
+≈ 11:1; **white on accent `#0E8A9A` is only 4.1:1, so solid accent buttons use `#0B7380` (5.6:1) and
+accent text uses `#0A6570`**; **white on CTA `#FF6B1A` is only ≈ 2.9:1, so CTA buttons use text `#1A2530`
+on `#FF6B1A` (5.45:1)** or the CTA color is used for borders/icons with dark text.
+A dark theme (toggle: light / dark / system) is defined in `frontend/src/styles/tokens.css` with
+every pair ≥ 6.8:1. Error `#D93636` on white ≈ 4.9:1 (OK). Success `#2E9E5B` on white ≈
 3.6:1 → use for icons/badges with dark text, not for body text.
 
 **Status badge mapping:** neutral (grey) = draft/pending; accent = in progress (PDA sent, in port);

@@ -22,7 +22,8 @@ export function AuthProvider({ children }) {
   const [error, setError] = useState(null);
 
   const signedIn = Boolean(devEmail || firebaseUser);
-  setTokenProvider(async () => (devEmail ? `dev:${devEmail}` : currentIdToken()));
+  // Dev tokens exist only in builds with VITE_DEV_AUTH=true (compiled out of production bundles).
+  setTokenProvider(async () => (import.meta.env.VITE_DEV_AUTH === "true" && devEmail ? `dev:${devEmail}` : currentIdToken()));
   setNotApprovedHandler((details) => setMe((m) => (m ? { ...m, next_step: details.next_step, user: { ...m.user, status: details.status } } : m)));
 
   useEffect(() => watchFirebaseUser((user) => setFirebaseUser(user)), []);

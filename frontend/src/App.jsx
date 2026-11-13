@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 
 import { AppShell, MorePage } from "./components/layout/AppShell";
+import ThemeToggle from "./components/ThemeToggle";
 import { ErrorAlert, Spinner } from "./components/ui";
 import { useAuth } from "./hooks/useAuth";
 import AdminAudit from "./routes/admin/Audit";
@@ -49,17 +50,20 @@ export default function App() {
   if (loading) return <div className="center-page"><Spinner /></div>;
   if (!signedIn || !me) {
     return (
+      <>
+      <ThemeToggle floating />
       <Routes>
         <Route path="/signin" element={<SignIn error={signedIn ? error : null} />} />
         <Route path="*" element={<Navigate to="/signin" replace state={{ from: location.pathname }} />} />
       </Routes>
+      </>
     );
   }
 
   const step = me.next_step;
-  if (step === "CHOOSE_ROLE") return <Routes><Route path="*" element={<ChooseRole />} /></Routes>;
-  if (step === "ONBOARDING" || step === "REJECTED") return <Routes><Route path="*" element={<Onboarding />} /></Routes>;
-  if (step === "PENDING_REVIEW" || step === "SUSPENDED") return <Routes><Route path="*" element={<PendingReview />} /></Routes>;
+  if (step === "CHOOSE_ROLE") return <><ThemeToggle floating /><Routes><Route path="*" element={<ChooseRole />} /></Routes></>;
+  if (step === "ONBOARDING" || step === "REJECTED") return <><ThemeToggle floating /><Routes><Route path="*" element={<Onboarding />} /></Routes></>;
+  if (step === "PENDING_REVIEW" || step === "SUSPENDED") return <><ThemeToggle floating /><Routes><Route path="*" element={<PendingReview />} /></Routes></>;
   if (step !== "APP") return <div className="center-page"><ErrorAlert error={{ message: `Unknown account state ${step}` }} /></div>;
 
   const Home = HOME[me.user.role];
