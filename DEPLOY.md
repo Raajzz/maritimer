@@ -33,9 +33,12 @@ Placeholders look like `<THIS>`.
 ## 2. Neon (PostgreSQL)
 
 1. Go to https://console.neon.tech and click **New project**. Use Postgres **16** and a region close to Render's (e.g. *AWS ap-southeast-1 Singapore*).
-2. On **Dashboard → Connection details**, select **Pooled connection** and copy the URI. It looks like:
-   `postgresql://<user>:<password>@<endpoint>-pooler.<region>.aws.neon.tech/neondb?sslmode=require`
-   This is `DATABASE_URL`.
+2. On the project dashboard click **Connect**. Leave **Connection pooling off** to get the *direct* connection string. It looks like:
+   `postgresql://<user>:<password>@<endpoint>.<region>.aws.neon.tech/neondb?sslmode=require`
+   This is `DATABASE_URL`. Use the direct string, not the `-pooler` one.
+   - The database driver (psycopg 3) automatically reuses prepared statements, which a transaction-mode pooler can break.
+   - Migrations also belong on a direct connection.
+   - The app opens only a few connections (2 workers, reused for 60 s), well within Neon's direct-connection limit.
 3. The migrations create the `citext` extension themselves; Neon allows it. Note the role name (`<user>`) for `AUDIT_LOG_REVOKE_ROLE`.
 
 ## 3. Cloudflare R2 (file storage)
@@ -55,7 +58,7 @@ Placeholders look like `<THIS>`.
 | Variable | Value |
 |---|---|
 | `DJANGO_ALLOWED_HOSTS` | `maritimer-api.onrender.com` (the Render hostname is also added automatically) |
-| `DATABASE_URL` | Neon pooled URI from step 2 |
+| `DATABASE_URL` | Neon **direct** connection string from step 2 (pooling off) |
 | `FIREBASE_PROJECT_ID` | from step 1 |
 | `CORS_ALLOWED_ORIGINS` | `https://<your-app>.vercel.app` (set after step 5; comma-separate several) |
 | `CORS_ALLOWED_ORIGIN_REGEXES` | `^https://<your-app>-[a-z0-9-]+\.vercel\.app$` (Vercel preview deploys, optional) |
