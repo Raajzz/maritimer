@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+backend/media/
+backend/staticfiles/*
+!backend/staticfiles/.gitkeep
+.env
+*.env.local
+# Node (Phase 3)
+node_modules/
+dist/
+.vercel/
+# OS
+.DS_Store
+
+# Local tool settings
+.claude/

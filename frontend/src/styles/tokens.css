@@ -1,0 +1,41 @@
+/* Design tokens (ARCHITECTURE.md §5). Use these variables everywhere; never hard-code colors. */
+:root {
+  --color-primary: #0B3C5D;      /* nav, headings, primary buttons — white text 11:1 */
+  --color-primary-hover: #082D46;
+  --color-accent:  #0E8A9A;      /* links, active states, secondary actions — white text 4.6:1 */
+  --color-accent-hover: #0B7380;
+  --color-cta:     #FF6B1A;      /* primary CTA + alerts needing action — dark text only (6.5:1) */
+  --color-cta-hover: #F05A08;
+  --color-success: #2E9E5B;      /* icons/badges with dark text; not body text */
+  --color-error:   #D93636;      /* 4.9:1 on white */
+  --color-bg:      #F4F7FA;
+  --color-text:    #1A2530;
+  --color-surface: #FFFFFF;
+  --color-muted:   #5B6B7A;      /* secondary text, 6.1:1 on white */
+  --color-border:  #DDE4EB;
+  --color-primary-soft: #E6EEF4;
+  --color-accent-soft:  #E3F3F5;
+  --color-cta-soft:     #FFEDE3;
+  --color-success-soft: #E6F5EC;
+  --color-error-soft:   #FBE7E7;
+  --color-success-text: #1F6E3F; /* success text on success-soft: 6.3:1 */
+  --color-cta-text:     #8A3300; /* cta text on cta-soft: 6.9:1 */
+  --color-accent-text:  #0A6570; /* accent text on accent-soft: 5.6:1 */
+
+  --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, monospace;
+  --text-xs: 0.75rem; --text-sm: 0.875rem; --text-md: 1rem; --text-lg: 1.125rem;
+  --text-xl: 1.375rem; --text-2xl: 1.75rem;
+
+  --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px; --space-5: 20px;
+  --space-6: 24px; --space-8: 32px; --space-10: 40px;
+
+  --radius-sm: 6px; --radius-md: 10px; --radius-lg: 14px; --radius-full: 999px;
+  --shadow-card: 0 1px 2px rgba(26, 37, 48, .06), 0 1px 6px rgba(26, 37, 48, .04);
+  --shadow-pop: 0 10px 30px rgba(26, 37, 48, .18);
+  --focus-ring: 0 0 0 3px rgba(14, 138, 154, .35);
+
+  --sidebar-w: 248px; --topbar-h: 56px; --tabbar-h: 60px;
+  --content-max: 1280px;
+  --touch: 44px;
+}

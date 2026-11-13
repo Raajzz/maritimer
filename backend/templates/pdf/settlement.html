@@ -1,0 +1,25 @@
+{% extends "pdf/base.html" %}{% load pdf_tags %}
+{% block title %}{{ settlement.reference }}{% endblock %}
+{% block heading %}Settlement Statement{% endblock %}
+{% block footer %}{{ settlement.reference }} · {{ settlement.status }}{% endblock %}
+{% block meta %}<div class="ref">{{ settlement.reference }}</div><div><span class="badge">{{ settlement.status }}</span></div>
+{% if settlement.closed_at %}<div class="small muted">Closed {{ settlement.closed_at|date:"Y-m-d" }}</div>{% endif %}{% endblock %}
+{% block content %}
+<h2>Summary ({{ settlement.currency_id }})</h2>
+<table class="summary">
+  <tr><td>Approved PDA</td><td class="num">{{ settlement.pda_total|money:settlement.currency_id }}</td></tr>
+  <tr><td>Final FDA ({{ settlement.fda.reference }})</td><td class="num">{{ settlement.fda_total|money:settlement.currency_id }}</td></tr>
+  <tr><td>Advance received</td><td class="num">− {{ settlement.advance_total|money:settlement.currency_id }}</td></tr>
+  <tr class="grand"><td>{% if settlement.direction == "BALANCE_DUE" %}Balance due from owner{% elif settlement.direction == "REFUND_DUE" %}Refund due to owner{% else %}Nil balance{% endif %}</td>
+    <td class="num">{{ abs_balance|money:settlement.currency_id }}</td></tr>
+  <tr><td>Settled to date</td><td class="num">{{ paid|money:settlement.currency_id }}</td></tr>
+  <tr><td><strong>Outstanding</strong></td><td class="num"><strong>{{ outstanding|money:settlement.currency_id }}</strong></td></tr>
+</table>
+<h2>Payments</h2>
+<table><thead><tr><th>Reference</th><th>Kind</th><th>Date</th><th>Method</th><th>Status</th><th class="num">Amount</th><th class="num">{{ settlement.currency_id }}</th></tr></thead><tbody>
+{% for p in payments %}<tr><td>{{ p.reference }}</td><td>{{ p.kind }}</td><td>{{ p.paid_at|date:"Y-m-d" }}</td><td>{{ p.method }}{% if p.bank_reference %} · {{ p.bank_reference }}{% endif %}</td><td>{{ p.status }}</td>
+<td class="num">{{ p.amount|money:p.currency_id }}</td><td class="num">{{ p.settlement_amount|money:settlement.currency_id }}</td></tr>
+{% empty %}<tr><td colspan="7" class="muted">No payments recorded.</td></tr>{% endfor %}
+</tbody></table>
+<p class="small muted">Only confirmed payments count towards the advance and settlement totals.</p>
+{% endblock %}

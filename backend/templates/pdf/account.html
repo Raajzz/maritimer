@@ -1,0 +1,61 @@
+{% extends "pdf/base.html" %}{% load pdf_tags %}
+{% block title %}{{ account.reference }}{% endblock %}
+{% block heading %}{{ title }}{% endblock %}
+{% block footer %}{{ account.reference }} · {{ account.status }}{% endblock %}
+{% block meta %}<div class="ref">{{ account.reference }}</div><div><span class="badge">{{ account.status }}</span> Version {{ account.version }}</div>
+{% if account.issued_at %}<div class="small muted">Issued {{ account.issued_at|date:"Y-m-d" }}</div>{% endif %}{% endblock %}
+{% block content %}
+<h2>Line items</h2>
+<table>
+  <thead><tr><th>#</th><th>Category</th><th>Description</th><th class="num">Qty</th><th class="num">Local amount</th><th class="num">FX rate</th><th class="num">Amount ({{ account.currency_id }})</th></tr></thead>
+  <tbody>
+  {% for line in lines %}
+    <tr><td>{{ line.line_no }}</td><td>{{ line.service_category.name }}</td>
+      <td>{{ line.description }}{% if line.vendor_organization %}<div class="small muted">Vendor: {{ line.vendor_organization.legal_name }}</div>{% endif %}
+        {% if account.kind == "FDA" %}{% if line.vendor_invoice %}<div class="small muted">Invoice {{ line.vendor_invoice.invoice_number }} ({{ line.vendor_invoice.issue_date|date:"Y-m-d" }})</div>{% elif line.is_adjustment %}<div class="small muted">Dispute adjustment</div>{% else %}<div class="small muted">Agent-paid</div>{% endif %}{% endif %}</td>
+      <td class="num">{{ line.quantity|qty }} {{ line.unit }}</td>
+      <td class="num">{{ line.local_amount|money:line.local_currency_id }}</td>
+      <td class="num">{% if line.fx_rate_id %}{{ line.fx_rate_applied|rate }}{% else %}—{% endif %}</td>
+      <td class="num">{{ line.amount|money:account.currency_id }}</td></tr>
+  {% endfor %}
+  <tr class="total"><td colspan="6">Total</td><td class="num">{{ account.total_amount|money:account.currency_id }}</td></tr>
+  </tbody>
+</table>
+{% if account.fx_policy_note %}<p class="small muted">FX: {{ account.fx_policy_note }} Rates are quote currency per 1 unit of the local currency; the exact applied rate is shown per line.</p>{% endif %}
+{% if account.notes %}<h2>Notes</h2><p>{{ account.notes|linebreaksbr }}</p>{% endif %}
+
+{% if variance %}
+<h2>Variance against {{ variance.pda_reference|default:"PDA" }}</h2>
+<table>
+  <thead><tr><th>Category</th><th>Description</th><th class="num">PDA</th><th class="num">FDA</th><th class="num">Variance</th></tr></thead>
+  <tbody>
+  {% for row in variance.lines %}
+    <tr><td>{{ row.category }}</td><td>{{ row.description }}</td><td class="num">{{ row.pda_amount|money:variance.currency_code }}</td>
+      <td class="num">{{ row.fda_amount|money:variance.currency_code }}</td>
+      <td class="num {% if row.variance > 0 %}pos{% elif row.variance < 0 %}neg{% endif %}">{{ row.variance|signed_money:variance.currency_code }}</td></tr>
+  {% endfor %}
+  <tr class="total"><td colspan="2">Total</td><td class="num">{{ variance.pda_total|money:variance.currency_code }}</td><td class="num">{{ variance.fda_total|money:variance.currency_code }}</td>
+    <td class="num">{{ variance.total_variance|signed_money:variance.currency_code }}</td></tr>
+  </tbody>
+</table>
+{% endif %}
+
+{% if disputes %}
+<h2>Disputes</h2>
+<table><thead><tr><th>Reference</th><th>Line</th><th>Status</th><th>Reason</th><th>Resolution</th></tr></thead><tbody>
+{% for d in disputes %}<tr><td>{{ d.reference }}</td><td>{{ d.line_item.description }}</td><td>{{ d.status }}</td><td>{{ d.reason }}</td><td>{{ d.resolution_type|default:"" }} {{ d.resolution_note }}</td></tr>{% endfor %}
+</tbody></table>
+{% endif %}
+
+{% if invoices %}
+<h2>Supporting vendor invoices</h2>
+<table><thead><tr><th>Invoice</th><th>Vendor</th><th>Date</th><th class="num">Total</th><th>Attachment</th></tr></thead><tbody>
+{% for inv in invoices %}<tr><td>{{ inv.invoice_number }}</td><td>{{ inv.vendor_organization.legal_name }}</td><td>{{ inv.issue_date|date:"Y-m-d" }}</td>
+<td class="num">{{ inv.total_amount|money:inv.currency_id }}</td><td class="small">{% if inv.file_id %}{% if inv.file.content_type == "application/pdf" %}Appended (PDF){% else %}Appended (image){% endif %}{% else %}Not attached{% endif %}</td></tr>{% endfor %}
+</tbody></table>
+{% endif %}
+
+{% for img in invoice_images %}
+<div class="appendix"><h2>Invoice {{ img.invoice.invoice_number }} — {{ img.invoice.vendor_organization.legal_name }}</h2><img src="{{ img.data_uri }}"></div>
+{% endfor %}
+{% endblock %}

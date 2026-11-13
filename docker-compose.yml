@@ -1,0 +1,55 @@
+# Local development: Postgres + Django API + Vite frontend.
+#   docker compose up --build
+#   docker compose exec backend python manage.py seed_demo
+# Then open http://localhost:5173 and use the "Development sign-in" buttons.
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: maritimer
+      POSTGRES_USER: maritimer
+      POSTGRES_PASSWORD: maritimer
+    ports: ["5432:5432"]
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U maritimer -d maritimer"]
+      interval: 3s
+      retries: 20
+
+  backend:
+    build:
+      context: ./backend
+      args: { INSTALL_DEV: "true" }
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings.dev
+      DATABASE_URL: postgres://maritimer:maritimer@db:5432/maritimer
+      AUTH_DEV_TOKENS: "true"
+      FIREBASE_PROJECT_ID: ${FIREBASE_PROJECT_ID:-}
+      CORS_ALLOWED_ORIGINS: http://localhost:5173,http://127.0.0.1:5173
+      MEDIA_ROOT: /app/media
+    command: sh -c "python manage.py migrate --noinput && python manage.py seed_masterdata && python manage.py runserver 0.0.0.0:8000"
+    ports: ["8000:8000"]
+    volumes:
+      - ./backend:/app
+      - media:/app/media
+    depends_on:
+      db: { condition: service_healthy }
+
+  frontend:
+    build: ./frontend
+    environment:
+      VITE_API_BASE_URL: http://localhost:8000/api/v1
+      VITE_DEV_AUTH: "true"
+      VITE_FIREBASE_API_KEY: ${VITE_FIREBASE_API_KEY:-}
+      VITE_FIREBASE_AUTH_DOMAIN: ${VITE_FIREBASE_AUTH_DOMAIN:-}
+      VITE_FIREBASE_PROJECT_ID: ${VITE_FIREBASE_PROJECT_ID:-}
+      VITE_FIREBASE_APP_ID: ${VITE_FIREBASE_APP_ID:-}
+    ports: ["5173:5173"]
+    volumes:
+      - ./frontend/src:/app/src
+      - ./frontend/public:/app/public
+    depends_on: [backend]
+
+volumes:
+  pgdata:
+  media:

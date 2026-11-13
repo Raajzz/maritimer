@@ -1,0 +1,46 @@
+# Render Blueprint: Dashboard → New → Blueprint → pick this repo.
+# Postgres is on Neon (see DEPLOY.md); paste its connection string into DATABASE_URL when prompted.
+services:
+  - type: web
+    name: maritimer-api
+    runtime: docker
+    rootDir: backend
+    dockerfilePath: ./Dockerfile
+    plan: free
+    region: singapore
+    healthCheckPath: /api/v1/health
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: config.settings.prod
+      - key: DJANGO_SECRET_KEY
+        generateValue: true
+      - key: DJANGO_ALLOWED_HOSTS
+        sync: false            # e.g. maritimer-api.onrender.com
+      - key: DATABASE_URL
+        sync: false            # Neon pooled connection string, ?sslmode=require
+      - key: FIREBASE_PROJECT_ID
+        sync: false
+      - key: CORS_ALLOWED_ORIGINS
+        sync: false            # e.g. https://maritimer.vercel.app
+      - key: CORS_ALLOWED_ORIGIN_REGEXES
+        sync: false            # e.g. ^https://maritimer-[a-z0-9-]+\.vercel\.app$  (preview deploys)
+      - key: STORAGE_BACKEND
+        value: s3
+      - key: S3_BUCKET_NAME
+        sync: false
+      - key: S3_ENDPOINT_URL
+        sync: false            # https://<account-id>.r2.cloudflarestorage.com
+      - key: S3_ACCESS_KEY_ID
+        sync: false
+      - key: S3_SECRET_ACCESS_KEY
+        sync: false
+      - key: S3_REGION_NAME
+        value: auto
+      - key: BOOTSTRAP_ADMIN_EMAIL
+        sync: false            # your Google email; safe to leave set (idempotent)
+      - key: AUDIT_LOG_REVOKE_ROLE
+        sync: false            # Neon role name used in DATABASE_URL (optional hardening)
+      - key: WEB_CONCURRENCY
+        value: "2"
+      - key: SECURE_SSL_REDIRECT
+        value: "true"

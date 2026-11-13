@@ -1,0 +1,51 @@
+{% load pdf_tags %}<!doctype html>
+<html><head><meta charset="utf-8"><title>{% block title %}{% endblock %}</title>
+<style>
+  :root { --color-primary:#0B3C5D; --color-accent:#0E8A9A; --color-cta:#FF6B1A; --color-success:#2E9E5B;
+          --color-error:#D93636; --color-bg:#F4F7FA; --color-text:#1A2530; --color-muted:#5B6B7A; --color-border:#DDE4EB; }
+  @page { size: A4; margin: 16mm 14mm 18mm; @bottom-right { content: "Page " counter(page) " of " counter(pages); font-size: 8pt; color: #5B6B7A; }
+          @bottom-left { content: "{% block footer %}{% endblock %}"; font-size: 8pt; color: #5B6B7A; } }
+  body { font-family: "Inter", "Helvetica Neue", Arial, sans-serif; color: var(--color-text); font-size: 9pt; line-height: 1.4; }
+  {% block watermark_css %}{% if is_draft %}
+  body::before { content: "DRAFT"; position: fixed; top: 38%; left: 12%; font-size: 110pt; color: rgba(217,54,54,.10); transform: rotate(-30deg); font-weight: 700; }
+  {% endif %}{% endblock %}
+  h1 { color: var(--color-primary); font-size: 17pt; margin: 0 0 2mm; }
+  h2 { color: var(--color-primary); font-size: 11pt; margin: 6mm 0 2mm; border-bottom: 1px solid var(--color-border); padding-bottom: 1mm; }
+  .muted { color: var(--color-muted); }
+  .header { display: flex; justify-content: space-between; border-bottom: 3px solid var(--color-primary); padding-bottom: 3mm; margin-bottom: 4mm; }
+  .brand { color: var(--color-accent); font-weight: 700; font-size: 10pt; letter-spacing: .08em; text-transform: uppercase; }
+  .meta { text-align: right; }
+  .meta .ref { font-size: 11pt; font-weight: 700; color: var(--color-primary); }
+  .grid { display: flex; gap: 6mm; }
+  .card { flex: 1; border: 1px solid var(--color-border); border-radius: 2mm; padding: 3mm; background: #fff; }
+  .card h3 { margin: 0 0 1mm; font-size: 8pt; text-transform: uppercase; letter-spacing: .06em; color: var(--color-muted); }
+  table { width: 100%; border-collapse: collapse; margin-top: 2mm; }
+  th { background: var(--color-primary); color: #fff; text-align: left; font-weight: 600; padding: 1.6mm 2mm; font-size: 8pt; }
+  td { padding: 1.6mm 2mm; border-bottom: 1px solid var(--color-border); vertical-align: top; }
+  tr:nth-child(even) td { background: var(--color-bg); }
+  .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .total td { font-weight: 700; border-top: 2px solid var(--color-primary); background: #fff !important; }
+  .pos { color: var(--color-error); } .neg { color: var(--color-success); }
+  .badge { display: inline-block; padding: .4mm 2mm; border-radius: 3mm; font-size: 7.5pt; font-weight: 600; background: #E6EEF4; color: var(--color-primary); }
+  .small { font-size: 7.5pt; }
+  .summary { margin-top: 4mm; margin-left: auto; width: 45%; }
+  .summary td { border: none; } .summary .grand td { font-size: 11pt; color: var(--color-primary); border-top: 2px solid var(--color-primary); }
+  .appendix { page-break-before: always; }
+  .appendix img { max-width: 100%; max-height: 240mm; border: 1px solid var(--color-border); }
+</style></head>
+<body>
+<div class="header">
+  <div><div class="brand">Maritimer</div><h1>{% block heading %}{% endblock %}</h1>
+    <div class="muted">{{ port_call.vessel.name }}{% if port_call.vessel.imo_number %} · IMO {{ port_call.vessel.imo_number }}{% endif %} · {{ port_call.port.name }}{% if port_call.port.unlocode %} ({{ port_call.port.unlocode }}){% endif %}</div></div>
+  <div class="meta">{% block meta %}{% endblock %}<div class="small muted">Generated {{ generated_at|date:"Y-m-d H:i" }} UTC</div></div>
+</div>
+<div class="grid">
+  <div class="card"><h3>Owner</h3><strong>{{ port_call.owner.name }}</strong><div class="small">{{ port_call.owner.address }}</div><div class="small">{{ port_call.owner.email }}</div></div>
+  <div class="card"><h3>Port agent</h3><strong>{{ port_call.agent.name }}</strong><div class="small">{{ port_call.agent.address }}</div><div class="small">{{ port_call.agent.email }} {{ port_call.agent.phone }}</div>{% if port_call.agent.tax_id %}<div class="small">Tax ID {{ port_call.agent.tax_id }}</div>{% endif %}</div>
+  <div class="card"><h3>Port call {{ port_call.reference }}</h3>
+    <div class="small">ETA {{ port_call.eta|date:"Y-m-d H:i" }} · ETD {{ port_call.etd|date:"Y-m-d H:i" }}</div>
+    {% if port_call.ata %}<div class="small">ATA {{ port_call.ata|date:"Y-m-d H:i" }}{% if port_call.atd %} · ATD {{ port_call.atd|date:"Y-m-d H:i" }}{% endif %}</div>{% endif %}
+    <div class="small">Cargo: {{ port_call.cargo_type }}</div></div>
+</div>
+{% block content %}{% endblock %}
+</body></html>
