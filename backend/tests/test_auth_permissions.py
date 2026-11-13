@@ -232,3 +232,28 @@ def test_reference_data_readable_during_onboarding(world):
     pending = User.objects.create(email="onb@test.io")
     for url in ("/api/v1/ports", "/api/v1/locations", "/api/v1/countries", "/api/v1/service-categories", "/api/v1/currencies", "/api/v1/cargo-types"):
         assert world.client(pending).get(url).status_code == 200
+
+
+def _claims(**over):
+    base = {"iss": "https://securetoken.google.com/proj-1", "aud": "proj-1", "sub": "uid-1", "email": "a@b.co", "email_verified": True}
+    return {**base, **over}
+
+
+def test_token_verification_checks_issuer_and_project(settings):
+    from apps.core import authentication
+
+    settings.FIREBASE_PROJECT_ID = "proj-1"
+    settings.FIREBASE_SERVICE_ACCOUNT_JSON_BASE64 = ""
+    with mock.patch("google.oauth2.id_token.verify_firebase_token", return_value=_claims()) as verify:
+        claims = authentication.verify_firebase_token("t")
+    assert claims["uid"] == "uid-1"
+    assert verify.call_args.kwargs["audience"] == "proj-1"  # audience is enforced by google-auth
+    with mock.patch("google.oauth2.id_token.verify_firebase_token", return_value=_claims(iss="https://securetoken.google.com/other")):
+        with pytest.raises(ValueError):
+            authentication.verify_firebase_token("t")
+    with mock.patch("google.oauth2.id_token.verify_firebase_token", return_value=_claims(sub="")):
+        with pytest.raises(ValueError):
+            authentication.verify_firebase_token("t")
+    settings.FIREBASE_PROJECT_ID = ""
+    with pytest.raises(ValueError):
+        authentication.verify_firebase_token("t")
