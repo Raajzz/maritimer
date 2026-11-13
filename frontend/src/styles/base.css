@@ -224,3 +224,13 @@ button, input, select, textarea { font: inherit; color: inherit; }
 
 .row > *, .row-between > * { min-width: 0; }
 .btn { max-width: 100%; }
+
+/* Theme switch: sun (light) | moon (dark) */
+.theme-switch { display: inline-flex; padding: 3px; gap: 2px; border-radius: var(--radius-full); background: var(--color-bg); border: 1px solid var(--color-border); }
+.theme-switch button {
+  display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border: 0; border-radius: var(--radius-full);
+  background: transparent; color: var(--color-muted); cursor: pointer; transition: background .15s, color .15s;
+}
+.theme-switch button:hover { color: var(--color-heading); }
+.theme-switch button.active { background: var(--color-surface); color: var(--color-heading); box-shadow: var(--shadow-card); }
+.theme-switch button.active:first-child { color: var(--color-cta-text); }

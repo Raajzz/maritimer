@@ -1,23 +1,32 @@
-import { Monitor, Moon, Sun } from "lucide-react";
+import { Moon, Sun } from "lucide-react";
 
 import { useTheme } from "../hooks/useTheme";
-import { Button } from "./ui";
 
-const NEXT = { light: "dark", dark: "system", system: "light" };
-const ICON = { light: Sun, dark: Moon, system: Monitor };
-const LABEL = { light: "Light theme", dark: "Dark theme", system: "System theme" };
+const OPTIONS = [
+  { value: "light", label: "Light mode", icon: Sun },
+  { value: "dark", label: "Dark mode", icon: Moon },
+];
 
-/** Cycles light → dark → system. */
+/** Sun = light mode, moon = dark mode. The active one is highlighted. */
 export default function ThemeToggle({ floating }) {
   const [theme, setTheme] = useTheme();
-  const button = (
-    <Button
-      variant="ghost"
-      icon={ICON[theme]}
-      aria-label={`${LABEL[theme]} (switch to ${LABEL[NEXT[theme]].toLowerCase()})`}
-      title={`${LABEL[theme]} — click for ${LABEL[NEXT[theme]].toLowerCase()}`}
-      onClick={() => setTheme(NEXT[theme])}
-    />
+  const control = (
+    <div className="theme-switch" role="radiogroup" aria-label="Colour theme">
+      {OPTIONS.map(({ value, label, icon: Icon }) => (
+        <button
+          key={value}
+          type="button"
+          role="radio"
+          aria-checked={theme === value}
+          aria-label={label}
+          title={label}
+          className={theme === value ? "active" : ""}
+          onClick={() => setTheme(value)}
+        >
+          <Icon size={16} aria-hidden />
+        </button>
+      ))}
+    </div>
   );
-  return floating ? <div style={{ position: "fixed", top: 12, right: 12, zIndex: 30 }}>{button}</div> : button;
+  return floating ? <div style={{ position: "fixed", top: 12, right: 12, zIndex: 30 }}>{control}</div> : control;
 }
