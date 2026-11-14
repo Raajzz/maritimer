@@ -5,13 +5,14 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from apps.core.enums import FxSource, Role
-from apps.core.exceptions import NotFound
+from apps.core.exceptions import NotFound, ValidationFailed
 from apps.core.pagination import StandardPagination
 from apps.core.permissions import approved
 from apps.core.serializers import RateField, dec, dt, validated
 
 from .models import CargoType, Country, Currency, FxRate, Location, Port, ServiceCategory
-from .services import record_fx_rate, resolve_rate
+from .fx_providers import FxProviderError
+from .services import fetch_and_record_market_rate, record_fx_rate, resolve_rate
 
 
 def country_data(c):
@@ -168,10 +169,34 @@ class FxRateLatestView(APIView):
         if not base or not quote:
             raise NotFound("Pass base and quote.")
         as_of = serializers.DateTimeField().to_internal_value(params["as_of_lte"]) if params.get("as_of_lte") else None
-        applied = resolve_rate(base, quote, as_of=as_of)
+        applied = resolve_rate(base, quote, as_of=as_of, auto_fetch=False)  # a GET never writes
         return Response({
             "rate": fx_data(applied.fx_rate) if applied.fx_rate else None,
             "applied_rate": dec(applied.applied),
             "inverse": applied.inverse,
             "note": applied.note,
         })
+
+
+class FxRateFetchInputSerializer(serializers.Serializer):
+    base_currency_code = serializers.CharField(max_length=3)
+    quote_currency_code = serializers.CharField(max_length=3)
+    as_of = serializers.DateTimeField(required=False, allow_null=True)
+
+
+class FxRateFetchView(APIView):
+    """Fetch the public market rate (ECB via Frankfurter, else currency-api) and record it."""
+
+    permission_classes = approved(Role.AGENT, Role.ADMIN)
+
+    def post(self, request):
+        data = validated(FxRateFetchInputSerializer, request.data)
+        base, quote = data["base_currency_code"].upper(), data["quote_currency_code"].upper()
+        if base == quote:
+            raise ValidationFailed("Base and quote currencies must differ.")
+        try:
+            fx = fetch_and_record_market_rate(base=base, quote=quote, as_of=data.get("as_of"), actor=request.user)
+        except FxProviderError:
+            raise ValidationFailed(f"No public market rate available for {base}/{quote} right now. Record it manually.",
+                                   code="fx_fetch_failed")
+        return Response(fx_data(fx), status=status.HTTP_201_CREATED)

@@ -18,7 +18,11 @@ Every step is audited, and the PDA, FDA and settlement statement are generated a
 
 ## Repository
 
+Live at **https://maritimer-sage.vercel.app** (API: https://maritimer-api.onrender.com/api/v1/health).
+
 ```
+FEATURES.md          everything the application does, by area and role
+DEPLOYMENT_LOG.md    how this deployment was actually done (services, settings, checks, problems hit)
 ARCHITECTURE.md      components, service-layer rules, auth, money/FX, PDF, design tokens, deployment decision
 SCHEMA.md            PostgreSQL schema (ER diagram, every table, decisions D1â€“D16, DB invariants)
 API.md               REST API per role
@@ -95,7 +99,7 @@ In production, pass one real Google account per role: `seed_demo --owner-email â
 ## Tests
 
 ```bash
-cd backend && .venv/bin/pytest          # 96 tests: permissions, state machines vs the doc, money/FX, settlement, disputes, invariants, API flow, PDFs
+cd backend && .venv/bin/pytest          # 109 tests: permissions, state machines vs the doc, money/FX (market rates mocked), settlement, disputes, invariants, API flow, PDFs
 cd frontend && npm test                 # formatting helpers
 ```
 

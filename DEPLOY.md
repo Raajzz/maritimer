@@ -144,6 +144,8 @@ Placeholders look like `<THIS>`.
 | `FILE_UPLOAD_MAX_BYTES` | no | 15 MB | |
 | `FDA_DISPUTE_WINDOW_DAYS` | no | `0` | days the owner has before the agent may finalize |
 | `SETTLEMENT_WRITEOFF_TOLERANCE` | no | `0.00` | max outstanding the agent may force-close |
+| `FX_AUTO_FETCH` | no | `true` | fetch market FX rates (ECB via frankfurter.dev, else currency-api) at transaction time; no API key needed |
+| `FX_FETCH_TIMEOUT_SECONDS` | no | `4` | per-request timeout for the FX APIs |
 | `BOOTSTRAP_ADMIN_EMAIL` | no | — | first admin, created on start |
 | `RUN_MIGRATIONS` | no | `true` | `bin/start.sh` |
 | `AUDIT_LOG_REVOKE_ROLE` | no | — | DB-level append-only audit log |

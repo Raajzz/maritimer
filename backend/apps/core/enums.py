@@ -63,6 +63,7 @@ class FxSource(models.TextChoices):
     MANUAL = "MANUAL"
     OPEN_EXCHANGE_RATES = "OPEN_EXCHANGE_RATES"
     ECB = "ECB"
+    CURRENCY_API = "CURRENCY_API"
     RBI = "RBI"
     OTHER = "OTHER"
 

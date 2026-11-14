@@ -86,6 +86,7 @@ StatusBadge  { status, status_changed_at }
 | `GET /fx-rates?base=INR&quote=USD&as_of_lte=2026-11-13` | A, X | list, newest first |
 | `GET /fx-rates/latest?base=INR&quote=USD&as_of_lte=` | A, X | the row the FDA builder would pick |
 | `POST /fx-rates` | A, X | `{base_currency_code, quote_currency_code, rate, as_of, source:"MANUAL", source_reference}` — append-only |
+| `POST /fx-rates/fetch` | A, X | `{base_currency_code, quote_currency_code, as_of?}` → fetches the public market rate for that date (ECB via Frankfurter, else currency-api) and records it (`source` ECB / CURRENCY_API). 400 `fx_fetch_failed` if no provider has it. Conversions also do this automatically (ARCHITECTURE.md §3.4) |
 | `POST /admin/locations`, `PATCH /admin/locations/{id}` | X | create / update (incl. `is_active`) |
 | `POST /admin/ports`, `PATCH /admin/ports/{id}` | X | |
 | `POST /admin/service-categories`, `PATCH .../{id}` | X | |

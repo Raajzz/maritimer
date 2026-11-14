@@ -152,7 +152,9 @@ Smaller additions, none of which changes a contract:
 
 ## Design changes requested
 
-None beyond the clarifications table above.
+| # | Change | Implementation |
+|---|---|---|
+| D1 | Owners and vendors can be in any country; support the main currencies and take FX at the time of the transaction from a public API, keeping it as the latest rate (2026-11-14) | Currencies USD, EUR, GBP, INR, SGD, AED, CNY, JPY, MYR. `masterdata/fx_providers.py` (Frankfurter/ECB, fallback fawazahmed0 currency-api, both keyless). `select_rate` auto-fetches when a pair has no rate on the transaction day and stores it as an append-only row dated at the transaction time. FDA invoice lines now use each invoice's issue date instead of ATD. New `POST /fx-rates/fetch` and a "Fetch market rate" button. 13 new tests; backend at 109. |
 
 ## Done log
 
@@ -162,3 +164,4 @@ None beyond the clarifications table above.
 - 2026-11-13 — User continued on Opus without the Fable review; C1–C3 accepted as implemented.
 - 2026-11-13 — Phase 3 frontend complete. Added C11 (merchant discovery) and C12 (reference data during onboarding). Backend at 96 tests.
 - 2026-11-13 — Phase 4 deployment configs and docs complete. Not yet deployed.
+- 2026-11-14 — Deployed (see DEPLOYMENT_LOG.md). Design change D1: multi-currency and market FX at transaction time.

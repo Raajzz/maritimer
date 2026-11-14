@@ -13,7 +13,7 @@ from apps.core.exceptions import Conflict, InvalidTransition, ValidationFailed
 from apps.core.money import convert, round_money, sum_money, to_decimal
 from apps.core.services import require, transition
 from apps.masterdata.models import Currency, ServiceCategory
-from apps.masterdata.services import resolve_rate
+from apps.masterdata.services import end_of_day, resolve_rate
 from apps.portcalls.services import has_live_disputes, lock_port_call, require_agent, require_owner, set_status
 
 from .models import DisbursementAccount, DisbursementLineItem
@@ -447,7 +447,9 @@ def generate_fda(*, actor, port_call, fx_rate_ids=None, notes=""):
             payload["fx_rate_id"] = fx_rate_ids.get(invoice.currency_id)
             if not payload["fx_rate_id"]:
                 try:
-                    payload["fx_rate_id"] = resolve_rate(invoice.currency_id, port_call.settlement_currency_id, as_of=as_of).fx_rate.pk
+                    # Each invoice converts at the rate of its own transaction date (its issue date).
+                    payload["fx_rate_id"] = resolve_rate(invoice.currency_id, port_call.settlement_currency_id,
+                                                         as_of=end_of_day(invoice.issue_date)).fx_rate.pk
                 except ValidationFailed:
                     missing_pairs.add(f"{invoice.currency_id}/{port_call.settlement_currency_id}")
                     continue
@@ -490,7 +492,9 @@ def generate_fda(*, actor, port_call, fx_rate_ids=None, notes=""):
         warnings.append("No accepted vendor invoices yet.")
 
     rule = "explicit rate ids " + ", ".join(f"{k}=#{v}" for k, v in fx_rate_ids.items()) + "; otherwise " if fx_rate_ids else ""
-    account.fx_policy_note = f"{rule}latest rate with as_of ≤ ATD ({as_of:%Y-%m-%d %H:%M} UTC) per currency pair."
+    account.fx_policy_note = (f"{rule}vendor invoices at the latest rate on or before each invoice's issue date; "
+                              f"other lines at the latest rate on or before ATD ({as_of:%Y-%m-%d %H:%M} UTC). "
+                              "Missing days are filled from public market rates (ECB via frankfurter.dev, else currency-api).")
     account.save(update_fields=["fx_policy_note", "updated_at"])
     replace_lines(actor=actor, account=account, lines=lines, port_call=port_call)
     audit(actor=actor, action="fda.generated", entity=account, port_call=port_call,

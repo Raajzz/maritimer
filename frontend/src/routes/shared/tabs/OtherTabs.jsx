@@ -116,7 +116,7 @@ function RecordPaymentModal({ pc, kind, suggested, onClose, onDone }) {
         <Select label="Method" options={["BANK_TRANSFER", "CASH", "CHEQUE", "CARD", "OTHER"].map((m) => ({ value: m, label: humanize(m) }))} {...bind("method")} />
       </div>
       <Input label="Bank reference" {...bind("bank_reference")} placeholder="SWIFT / UTR / TT reference" />
-      {form.currency_code !== "USD" && <p className="xs muted">Converted to USD at the latest recorded rate on the value date.</p>}
+      {form.currency_code !== "USD" && <p className="xs muted">Converted to USD at the market rate of the payment date (fetched automatically), or a rate recorded later that day.</p>}
       <ErrorAlert error={save.error} />
     </Modal>
   );

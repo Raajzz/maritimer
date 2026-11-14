@@ -13,3 +13,4 @@ MEDIA_ROOT = tempfile.mkdtemp(prefix="maritimer-test-media-")
 PASSWORD_HASHERS = ["django.contrib.auth.hashers.MD5PasswordHasher"]
 REST_FRAMEWORK = {**REST_FRAMEWORK}  # noqa: F405
 REST_FRAMEWORK["DEFAULT_THROTTLE_CLASSES"] = []
+FX_AUTO_FETCH = False  # never call external FX APIs from tests; providers are mocked where tested

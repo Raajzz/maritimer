@@ -6,6 +6,8 @@ import { useResource } from "../../hooks/useResource";
 import { api, qs } from "../../lib/api";
 import { formatDateTime, formatRate, fromLocalInput, humanize, toLocalInput } from "../../lib/format";
 
+const SOURCE_LABEL = { ECB: "Market (ECB)", CURRENCY_API: "Market (currency-api)", MANUAL: "Manual" };
+
 /** FX rates are append-only: corrections are new rows (SCHEMA.md D9). */
 export default function FxRates() {
   const currencies = useResource("/currencies");
@@ -19,13 +21,27 @@ export default function FxRates() {
     setForm({ ...form, rate: "", source_reference: "" });
     rates.refetch();
   });
-  const opts = (currencies.data || []).map((c) => ({ value: c.code, label: c.code }));
+  const [fetched, setFetched] = useState(null);
+  const fetchMarket = useAction(async () => {
+    setFetched(null);
+    const fx = await api.post("/fx-rates/fetch", { base_currency_code: form.base_currency_code, quote_currency_code: form.quote_currency_code, as_of: fromLocalInput(form.as_of) });
+    setFilter({ base: fx.base_currency_code, quote: fx.quote_currency_code });
+    setPage(1);
+    rates.refetch();
+    setFetched(fx);
+  });
+  const opts = (currencies.data || []).map((c) => ({ value: c.code, label: `${c.code} · ${c.name}` }));
   return (
     <div className="stack">
       <PageHeader title="FX rates" sub="Rates used to convert vendor invoices into the owner's settlement currency." />
       <Card title="Record a rate">
         <form className="stack" onSubmit={(e) => { e.preventDefault(); add.run(); }}>
-          <Alert tone="info">Rate = units of the quote currency per 1 unit of the base currency. Example: 1 INR = 0.0120 USD. The FDA uses the latest rate dated on or before the vessel's departure.</Alert>
+          <Alert tone="info">
+            Rate = units of the quote currency per 1 unit of the base currency (1 INR = 0.0106 USD). Rates are fetched automatically at the time of each transaction:
+            vendor invoices use the rate of their issue date, payments their payment date, other FDA lines the vessel's departure. Market rates come from the
+            European Central Bank (via frankfurter.dev), or currency-api for currencies the ECB doesn't publish. A rate you record here is used instead when
+            it is the latest one on or before the transaction.
+          </Alert>
           <div className="grid grid-4">
             <Select label="Base" options={opts} {...bind("base_currency_code")} />
             <Select label="Quote" options={opts} {...bind("quote_currency_code")} />
@@ -34,7 +50,18 @@ export default function FxRates() {
           </div>
           <Input label="Source / reference" placeholder="RBI reference rate 13-Nov" {...bind("source_reference")} />
           <ErrorAlert error={add.error} />
-          <div><Button type="submit" busy={add.busy} disabled={!form.rate}>Record rate</Button></div>
+          <ErrorAlert error={fetchMarket.error} />
+          {fetched && (
+            <Alert tone="success">
+              Recorded 1 {fetched.base_currency_code} = {formatRate(fetched.rate)} {fetched.quote_currency_code} · {fetched.source_reference}
+            </Alert>
+          )}
+          <div className="row">
+            <Button type="submit" busy={add.busy} disabled={!form.rate}>Record rate</Button>
+            <Button type="button" variant="secondary" busy={fetchMarket.busy} disabled={form.base_currency_code === form.quote_currency_code} onClick={() => fetchMarket.run()}>
+              Fetch market rate for this date
+            </Button>
+          </div>
         </form>
       </Card>
       <Card title="History">
@@ -50,7 +77,7 @@ export default function FxRates() {
                 { key: "pair", label: "Pair", render: (r) => `${r.base_currency_code} → ${r.quote_currency_code}` },
                 { key: "rate", label: "Rate", num: true, render: (r) => formatRate(r.rate) },
                 { key: "as_of", label: "Valid as of", render: (r) => formatDateTime(r.as_of) },
-                { key: "source", label: "Source", render: (r) => `${humanize(r.source)}${r.source_reference ? ` · ${r.source_reference}` : ""}` },
+                { key: "source", label: "Source", render: (r) => `${SOURCE_LABEL[r.source] || humanize(r.source)}${r.source_reference ? ` · ${r.source_reference}` : ""}` },
               ]} />
               <Pager data={data} page={page} onPage={setPage} />
             </>

@@ -41,6 +41,7 @@ urlpatterns = [
     path("currencies", master.CurrencyListView.as_view()),
     path("fx-rates", master.FxRateListView.as_view()),
     path("fx-rates/latest", master.FxRateLatestView.as_view()),
+    path("fx-rates/fetch", master.FxRateFetchView.as_view()),
     path("admin/locations", admin.AdminLocationCreateView.as_view()),
     path("admin/locations/<int:pk>", admin.AdminLocationDetailView.as_view()),
     path("admin/ports", admin.AdminPortCreateView.as_view()),

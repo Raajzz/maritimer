@@ -134,10 +134,24 @@ def issue_pda(*, actor: User, account: DisbursementAccount) -> DisbursementAccou
 - Every converted line stores `fx_rate_id` (provenance) **and** `fx_rate_applied` (the exact decimal
   used), so a regenerated FDA PDF reproduces the original numbers even if rate rows are later added.
   `fx_rates` rows are immutable (no update endpoint; corrections are new rows).
-- FX rate sourcing in v1: Admin/Agent enters rates manually (`source=MANUAL`) and an optional
-  management command pulls daily rates from a provider (`source=<PROVIDER>`); the FDA builder picks
-  the latest rate with `as_of <= port_call.atd` per currency pair, and the agent may override per
-  FDA with an explicit rate id. Selection rule is recorded in audit metadata.
+- Currencies seeded: USD, EUR, GBP, INR, SGD, AED, CNY, JPY (0 minor units), MYR. Any pair converts,
+  directly or through the inverse quote. Account (PDA/FDA/settlement) currency is the port call's
+  settlement currency (USD).
+- FX rate sourcing (change request D1, see PROGRESS.md): rates are taken **at the time of the
+  transaction**. When a conversion needs a pair that has no rate recorded on the transaction's UTC
+  day, `select_rate` fetches the public market rate for that date (`masterdata/fx_providers.py`):
+  1. Frankfurter (ECB reference rates, `source=ECB`), then
+  2. fawazahmed0 currency-api on jsDelivr / Cloudflare Pages (`source=CURRENCY_API`), for currencies
+     the ECB doesn't publish (AED, LKR…) or when Frankfurter is down.
+  The result is stored as a normal append-only `fx_rates` row dated at the transaction time, so it is
+  the latest rate for that transaction and is reused for the rest of the day. Agents/admins can
+  still record manual rates (`source=MANUAL`) or fetch on demand (`POST /fx-rates/fetch`); whichever
+  row is latest on or before the transaction wins. If the fetch fails, the latest recorded rate is
+  used; if there is none, the operation fails with `fx_rate_missing`. `FX_AUTO_FETCH=false` turns
+  fetching off (tests always do).
+- Transaction time per conversion: vendor invoice → its issue date (end of day, capped at now);
+  payment → `paid_at`; PDA lines → now; other FDA lines (agency fee, manual lines) → ATD. The agent
+  may override per FDA with an explicit rate id. The rule is recorded in `fx_policy_note`.
 - Settlement math (all USD, Decimal):
   `advance_total = Σ CONFIRMED payments kind=ADVANCE`;
   `balance = fda_total − advance_total`;

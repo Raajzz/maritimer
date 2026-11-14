@@ -148,6 +148,11 @@ AUTH_DEV_TOKENS = env_bool("AUTH_DEV_TOKENS", False)
 # ---- Domain settings ------------------------------------------------------
 FDA_DISPUTE_WINDOW_DAYS = int(env("FDA_DISPUTE_WINDOW_DAYS", "0"))
 SETTLEMENT_WRITEOFF_TOLERANCE = env("SETTLEMENT_WRITEOFF_TOLERANCE", "0.00")
+# Fetch the market rate for the transaction date from free public APIs (masterdata/fx_providers.py)
+# whenever a conversion has no rate recorded for that day. Manual rates still work and take precedence
+# when they are the latest on or before the transaction time.
+FX_AUTO_FETCH = env_bool("FX_AUTO_FETCH", True)
+FX_FETCH_TIMEOUT_SECONDS = float(env("FX_FETCH_TIMEOUT_SECONDS", "4"))
 DEFAULT_SETTLEMENT_CURRENCY = "USD"
 
 # ---- DRF ------------------------------------------------------------------

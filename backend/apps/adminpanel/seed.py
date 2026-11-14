@@ -17,7 +17,8 @@ COUNTRIES = [
     ("US", "USA", "United States"), ("JP", "JPN", "Japan"), ("KR", "KOR", "South Korea"),
 ]
 CURRENCIES = [("USD", "US Dollar", "$", 2), ("INR", "Indian Rupee", "₹", 2), ("SGD", "Singapore Dollar", "S$", 2),
-              ("AED", "UAE Dirham", "AED", 2), ("EUR", "Euro", "€", 2), ("MYR", "Malaysian Ringgit", "RM", 2)]
+              ("AED", "UAE Dirham", "AED", 2), ("EUR", "Euro", "€", 2), ("MYR", "Malaysian Ringgit", "RM", 2),
+              ("GBP", "Pound Sterling", "£", 2), ("CNY", "Chinese Yuan", "¥", 2), ("JPY", "Japanese Yen", "¥", 0)]
 LOCATIONS = [
     ("IN", "Mumbai", "Maharashtra", [("Mumbai Port", "INBOM", "Asia/Kolkata", "18.9500", "72.8400"),
                                      ("Jawaharlal Nehru Port (Nhava Sheva)", "INNSA", "Asia/Kolkata", "18.9490", "72.9510")]),
@@ -117,7 +118,20 @@ def _demo_pdf(title, lines):
         return out
 
 
-def seed_demo(*, admin_email, owner_email, agent_email, merchant_emails, stdout=None):
+def seed_demo(**kwargs):
+    """Demo data uses only the rates recorded below, so it is the same every time and needs no network.
+    Actions taken later in the running app fetch live market rates as usual."""
+    from django.conf import settings
+
+    previous = settings.FX_AUTO_FETCH
+    settings.FX_AUTO_FETCH = False
+    try:
+        return _seed_demo(**kwargs)
+    finally:
+        settings.FX_AUTO_FETCH = previous
+
+
+def _seed_demo(*, admin_email, owner_email, agent_email, merchant_emails, stdout=None):
     from apps.accounts import services as acc
     from apps.accounts.models import Organization, User
     from apps.chat.models import ChatThread
@@ -146,10 +160,10 @@ def seed_demo(*, admin_email, owner_email, agent_email, merchant_emails, stdout=
     admin, _ = acc.bootstrap_admin(email=admin_email, display_name="Demo Admin")
 
     # FX rates (INR→USD direct quotes, plus one USD→INR quote to show inverse handling)
-    for days, rate_value in ((45, "0.0119500000"), (20, "0.0120100000"), (8, "0.0119800000"), (1, "0.0120000000")):
+    for days, rate_value in ((45, "0.0107200000"), (20, "0.0106800000"), (8, "0.0106500000"), (1, "0.0106100000")):
         record_fx_rate(actor=admin, base_currency_code="INR", quote_currency_code="USD", rate=rate_value,
                        as_of=now - timedelta(days=days), source_reference="Demo rate (RBI reference)")
-    record_fx_rate(actor=admin, base_currency_code="SGD", quote_currency_code="USD", rate="0.7450000000", as_of=now - timedelta(days=20))
+    record_fx_rate(actor=admin, base_currency_code="SGD", quote_currency_code="USD", rate="0.7763000000", as_of=now - timedelta(days=20))
     record_fx_rate(actor=admin, base_currency_code="USD", quote_currency_code="AED", rate="3.6725000000", as_of=now - timedelta(days=20))
 
     mumbai = Location.objects.get(name="Mumbai")
