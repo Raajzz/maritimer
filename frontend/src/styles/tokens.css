@@ -87,12 +87,10 @@
   color-scheme: dark;
 }
 
-/* Role tints: the page background (and pipeline columns) take a hue per role, so each workspace is recognisable.
-   Owner = ocean blue, Port agent = harbour teal, Merchant = soft violet. Admin keeps the default.
-   All body/muted text sits on white/dark surfaces, so contrast is unchanged; muted text on these backgrounds and columns stays >= 4.5:1. */
-:root[data-role="owner"]    { --color-bg: #EBF2FB; --color-col: #E3EDF9; }
-:root[data-role="agent"]    { --color-bg: #E8F5F3; --color-col: #DAEDEA; }
-:root[data-role="merchant"] { --color-bg: #F3EFFA; --color-col: #EEE8F8; }
-:root[data-theme="dark"][data-role="owner"]    { --color-bg: #0C1522; --color-col: #0F1B2B; }
-:root[data-theme="dark"][data-role="agent"]    { --color-bg: #0A1917; --color-col: #0D201E; }
-:root[data-theme="dark"][data-role="merchant"] { --color-bg: #14101F; --color-col: #1A1428; }
+/* Role tints: only the sidebar changes per role, so the app stays blue but each workspace is recognisable.
+   Owner = navy (default), Port agent = blue-teal, Merchant = indigo. Admin keeps the default.
+   White sidebar text stays >= 7:1 on every variant (nav links at 80% white stay >= 5.5:1). */
+:root[data-role="agent"]    { --color-sidebar: #0A4652; }
+:root[data-role="merchant"] { --color-sidebar: #26306A; }
+:root[data-theme="dark"][data-role="agent"]    { --color-sidebar: #08222A; }
+:root[data-theme="dark"][data-role="merchant"] { --color-sidebar: #141834; }
