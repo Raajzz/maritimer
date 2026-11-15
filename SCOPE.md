@@ -103,7 +103,7 @@
 - **Interface:**
   - Mobile-friendly layout with a bottom tab bar on phones.
   - Light and dark mode (sun/moon switch).
-  - A background tint per role: blue for owners, teal for agents, sand for merchants.
+  - A background tint per role: blue for owners, teal for agents, violet for merchants.
   - WCAG AA colour contrast.
 - **Deployment:** live on free tiers of Vercel, Render, Neon, Cloudflare R2 and Firebase.
 - **Tests:** 109 automated backend tests.

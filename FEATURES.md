@@ -317,7 +317,7 @@ Each role lands on its own home screen.
   - A **sun / moon switch** in the top bar and on the sign-in and onboarding screens.
   - It follows the system setting until you choose, and your choice is remembered on that device.
   - The theme is applied before the page paints, so there's no flash.
-- **A tint per role:** the page background is ocean blue for owners, harbour teal for port agents and warm sand for merchants, in both themes, so each workspace is easy to tell apart.
+- **A tint per role:** the page background is ocean blue for owners, harbour teal for port agents and soft violet for merchants, in both themes, so each workspace is easy to tell apart.
 - **Brand palette:**
   - Navy `#0B3C5D`, teal `#0E8A9A`, orange call-to-action `#FF6B1A`, plus success green and error red.
   - Every text and background pair meets **WCAG AA contrast** in both themes.
