@@ -69,37 +69,6 @@ function CancelModal({ onClose, onSubmit }) {
   );
 }
 
-/** The owner's original request: services needed, cargo details and notes (not shown to merchants). */
-function Requirements({ requestId }) {
-  const resource = useResource(`/requests/${requestId}`);
-  return (
-    <Card title="Owner's requirements" actions={<Link to={`/requests/${requestId}`} className="small">Open request</Link>}>
-      <Loader resource={resource}>
-        {(r) => {
-          const d = r.details;
-          return (
-            <div className="stack">
-              {d && (d.cargo_description || d.cargo_quantity) && (
-                <DefinitionList items={[
-                  ["Cargo", `${d.cargo_type.name}${d.cargo_description ? ` · ${d.cargo_description}` : ""}${d.cargo_quantity ? ` · ${d.cargo_quantity} ${d.cargo_unit}` : ""}`],
-                ]} />
-              )}
-              <div>
-                <div className="small strong">Services needed</div>
-                <ul className="small" style={{ margin: "4px 0 0", paddingLeft: 18 }}>
-                  {r.services.map((s) => <li key={s.service_category.id}>{s.service_category.name}{s.quantity ? ` · ${s.quantity} ${s.unit}` : ""}{s.notes ? ` · ${s.notes}` : ""}</li>)}
-                  {!r.services.length && <li className="muted">None listed</li>}
-                </ul>
-              </div>
-              {r.message && <div><div className="small strong">Notes from the owner</div><p className="small" style={{ whiteSpace: "pre-wrap", margin: "4px 0 0" }}>{r.message}</p></div>}
-            </div>
-          );
-        }}
-      </Loader>
-    </Card>
-  );
-}
-
 function Overview({ pc, onAction }) {
   const [modal, setModal] = useState(null);
   const can = (a) => pc.allowed_actions.includes(a);
@@ -125,7 +94,6 @@ function Overview({ pc, onAction }) {
           {pc.notes && <p className="small" style={{ marginTop: 12, whiteSpace: "pre-wrap" }}>{pc.notes}</p>}
           {pc.cancelled_reason && <Alert tone="error">Cancelled: {pc.cancelled_reason}</Alert>}
         </Card>
-        {!restricted && pc.request_id && <Requirements requestId={pc.request_id} />}
         {!restricted && (
           <Card title="Money">
             <DefinitionList items={[
