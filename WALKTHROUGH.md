@@ -24,11 +24,9 @@ Automated equivalents: `backend/tests/test_api_flow.py` covers the HTTP flow. Th
 - [ ] Sign in as a **new** account. Locally, type any email such as `new.agent@example.com` in the dev box. In production, use an unseeded Google account.
 - [ ] **Choose role** shows Owner / Port agent / Merchant. Pick **Port agent** and click **Continue**.
 - [ ] Onboarding shows four sections. **Submit for review** is disabled, and the warning lists what's missing.
-- [ ] Fill in the legal name and city, then **Save company details**.
-- [ ] Add a description and an agency fee, then **Save profile**.
-- [ ] Tick **Mumbai Port** and a few services, then **Save coverage**.
-- [ ] Upload a PDF as *Company registration*. It appears with a *Pending* badge.
-- [ ] **Submit for review** shows the *Under review* screen. Try a deep link such as `/port-calls`; you stay on *Under review*. The API returns `403 not_approved`.
+- [ ] Fill in the legal name and city, a description and an agency fee, tick **Mumbai Port** and a few services, and choose a PDF as *Company registration*. The missing list shrinks as you type; there is no per-section save.
+- [ ] Optional: **Save and finish later**, reload, and the details and document (with a *Pending* badge) are still there.
+- [ ] **Submit for review** saves everything and shows the *Under review* screen. Try a deep link such as `/port-calls`; you stay on *Under review*. The API returns `403 not_approved`.
 - [ ] Sign in as **Admin**. On **Approvals**, the user is listed as *Pending review*. Open the user.
 - [ ] Open the document; it views in a new tab. Click **Approve document**, then **Approve user & organization**.
 - [ ] Sign back in as the new agent and confirm the **Pipeline** loads.

@@ -63,7 +63,7 @@
 
 **Accounts and access**
 - Google sign-in through Firebase.
-- New users go through onboarding: company details, profile, coverage and verification documents.
+- New users go through onboarding: company details, profile, coverage and verification documents, saved and submitted with one button.
 - An Admin approves or rejects every new user, organization and document.
 - Four roles (Owner, Port agent, Merchant, Admin), checked on the server for every action.
 - Each company sees only its own data.
@@ -103,6 +103,7 @@
 - **Interface:**
   - Mobile-friendly layout with a bottom tab bar on phones.
   - Light and dark mode (sun/moon switch).
+  - A background tint per role: blue for owners, teal for agents, sand for merchants.
   - WCAG AA colour contrast.
 - **Deployment:** live on free tiers of Vercel, Render, Neon, Cloudflare R2 and Firebase.
 - **Tests:** 109 automated backend tests.

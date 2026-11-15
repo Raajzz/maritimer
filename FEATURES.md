@@ -57,7 +57,7 @@ One Google account has exactly one role. Every user belongs to an organization (
        - Merchants: description, catalogue notes, default currency.
      - Coverage: the locations and ports you work in. Agents and merchants also pick the services they offer.
      - Verification documents: upload certificates and licences (PDF or image).
-  3. **Submit for review.** The form checks completeness and lists anything missing.
+  3. **Submit for review.** One button saves every section (and uploads the chosen document) and submits. There is no per-section save. The form lists anything missing as you type. **Save and finish later** keeps a draft.
   4. **Pending review** screen until an Admin approves you. A rejection includes the reason and lets you fix and resubmit. Suspended accounts see a suspension screen.
 - The **first Admin** is created from the `BOOTSTRAP_ADMIN_EMAIL` setting and becomes linked when that Google account first signs in.
 - Admins can also **pre-create** organizations and users. Those users skip onboarding and are linked on first sign-in.
@@ -317,6 +317,7 @@ Each role lands on its own home screen.
   - A **sun / moon switch** in the top bar and on the sign-in and onboarding screens.
   - It follows the system setting until you choose, and your choice is remembered on that device.
   - The theme is applied before the page paints, so there's no flash.
+- **A tint per role:** the page background is ocean blue for owners, harbour teal for port agents and warm sand for merchants, in both themes, so each workspace is easy to tell apart.
 - **Brand palette:**
   - Navy `#0B3C5D`, teal `#0E8A9A`, orange call-to-action `#FF6B1A`, plus success green and error red.
   - Every text and background pair meets **WCAG AA contrast** in both themes.

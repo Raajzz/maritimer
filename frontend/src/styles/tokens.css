@@ -86,3 +86,13 @@
   --shadow-pop: 0 10px 30px rgba(0, 0, 0, .55);
   color-scheme: dark;
 }
+
+/* Role tints: the page background (and pipeline columns) take a hue per role, so each workspace is recognisable.
+   Owner = ocean blue, Port agent = harbour teal, Merchant = warm sand. Admin keeps the default.
+   All body/muted text sits on white/dark surfaces, so contrast is unchanged; muted text on these backgrounds and columns stays >= 4.5:1. */
+:root[data-role="owner"]    { --color-bg: #EBF2FB; --color-col: #E3EDF9; }
+:root[data-role="agent"]    { --color-bg: #E8F5F3; --color-col: #DAEDEA; }
+:root[data-role="merchant"] { --color-bg: #FAF4EA; --color-col: #F4ECDE; }
+:root[data-theme="dark"][data-role="owner"]    { --color-bg: #0C1522; --color-col: #0F1B2B; }
+:root[data-theme="dark"][data-role="agent"]    { --color-bg: #0A1917; --color-col: #0D201E; }
+:root[data-theme="dark"][data-role="merchant"] { --color-bg: #18130C; --color-col: #1F1910; }

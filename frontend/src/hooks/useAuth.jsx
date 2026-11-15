@@ -47,6 +47,14 @@ export function AuthProvider({ children }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [devEmail, firebaseUser?.uid]);
 
+  // Each role gets its own page tint (tokens.css, [data-role]).
+  const role = me?.user?.role;
+  useEffect(() => {
+    const root = document.documentElement;
+    if (role) root.dataset.role = role.toLowerCase();
+    else delete root.dataset.role;
+  }, [role]);
+
   const value = {
     me,
     error,
