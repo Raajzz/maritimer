@@ -317,7 +317,7 @@ Each role lands on its own home screen.
   - A **sun / moon switch** in the top bar and on the sign-in and onboarding screens.
   - It follows the system setting until you choose, and your choice is remembered on that device.
   - The theme is applied before the page paints, so there's no flash.
-- **A sidebar colour per role:** navy for owners, blue-teal for port agents and indigo for merchants, in both themes. The rest of the app stays blue, so each workspace is easy to tell apart.
+- **A sidebar colour per role:** indigo for owners, navy for port agents and deep ocean (near-black blue) for merchants, in both themes. The rest of the app stays blue, so each workspace is easy to tell apart.
 - **Brand palette:**
   - Navy `#0B3C5D`, teal `#0E8A9A`, orange call-to-action `#FF6B1A`, plus success green and error red.
   - Every text and background pair meets **WCAG AA contrast** in both themes.

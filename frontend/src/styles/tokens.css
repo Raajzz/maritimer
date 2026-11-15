@@ -88,9 +88,9 @@
 }
 
 /* Role tints: only the sidebar changes per role, so the app stays blue but each workspace is recognisable.
-   Owner = navy (default), Port agent = blue-teal, Merchant = indigo. Admin keeps the default.
-   White sidebar text stays >= 7:1 on every variant (nav links at 80% white stay >= 5.5:1). */
-:root[data-role="agent"]    { --color-sidebar: #0A4652; }
-:root[data-role="merchant"] { --color-sidebar: #26306A; }
-:root[data-theme="dark"][data-role="agent"]    { --color-sidebar: #08222A; }
-:root[data-theme="dark"][data-role="merchant"] { --color-sidebar: #141834; }
+   Owner = indigo, Port agent = navy (default), Merchant = deep ocean. Admin keeps the default navy.
+   White sidebar text stays >= 7:1 on every variant (nav links at 80% white stay >= 5.4:1). */
+:root[data-role="owner"]    { --color-sidebar: #26306A; }
+:root[data-role="merchant"] { --color-sidebar: #0B2440; }
+:root[data-theme="dark"][data-role="owner"]    { --color-sidebar: #141834; }
+:root[data-theme="dark"][data-role="merchant"] { --color-sidebar: #050D18; }

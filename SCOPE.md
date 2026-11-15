@@ -103,7 +103,7 @@
 - **Interface:**
   - Mobile-friendly layout with a bottom tab bar on phones.
   - Light and dark mode (sun/moon switch).
-  - A sidebar colour per role: navy for owners, blue-teal for agents, indigo for merchants.
+  - A sidebar colour per role: indigo for owners, navy for agents, deep ocean for merchants.
   - WCAG AA colour contrast.
 - **Deployment:** live on free tiers of Vercel, Render, Neon, Cloudflare R2 and Firebase.
 - **Tests:** 109 automated backend tests.
