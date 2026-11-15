@@ -13,6 +13,8 @@ class Command(BaseCommand):
         parser.add_argument("--agent-email", default="agent.demo@maritimer.test")
         parser.add_argument("--merchant-emails", default="pilots.demo@maritimer.test,supplies.demo@maritimer.test,customs.demo@maritimer.test",
                             help="Three comma-separated emails: pilots/tugs, supplies, customs.")
+        parser.add_argument("--name-suffix", default="", help='Appended to every demo company name, e.g. " (Demo)", so it cannot clash with real companies.')
+        parser.add_argument("--live-fx", action="store_true", help="Record no demo FX rates; fetch real market rates for each transaction date.")
 
     def handle(self, *args, **o):
         merchants = [e.strip() for e in o["merchant_emails"].split(",") if e.strip()]
@@ -21,5 +23,5 @@ class Command(BaseCommand):
             return
         with transaction.atomic():
             seed_demo(admin_email=o["admin_email"], owner_email=o["owner_email"], agent_email=o["agent_email"],
-                      merchant_emails=merchants, stdout=self.stdout)
+                      merchant_emails=merchants, name_suffix=o["name_suffix"], live_fx=o["live_fx"], stdout=self.stdout)
         self.stdout.write(self.style.SUCCESS("Demo data ready."))

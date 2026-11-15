@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Alert, Button, ErrorAlert, Input } from "../../components/ui";
 import { useAction } from "../../hooks/useAction";
 import { useAuth } from "../../hooks/useAuth";
-import { devAuthEnabled, firebaseEnabled } from "../../lib/firebase";
+import { devAuthEnabled, firebaseEnabled, signInWithDemoAccount } from "../../lib/firebase";
 
 // Only present in builds made with VITE_DEV_AUTH=true. Vite replaces the env check with a constant at
 // build time, so production bundles contain neither these addresses nor the dev sign-in UI.
@@ -14,6 +14,15 @@ const DEMO_USERS = import.meta.env.VITE_DEV_AUTH !== "true" ? [] : [
   ["Merchant · pilots & tugs", "pilots.demo@maritimer.test"],
   ["Merchant · supplies", "supplies.demo@maritimer.test"],
   ["Admin", "admin@maritimer.test"],
+];
+
+// Public demo logins for reviewers (production). Each is a Firebase email/password account linked to a
+// seeded demo company, so it only sees demo data. The password is intentionally public.
+const DEMO_PASSWORD = "MaritimerDemo2026";
+const DEMO_ACCOUNTS = [
+  ["Owner", "Lion City Shipping", "owner.demo@maritimer.test"],
+  ["Port agent", "Bombay Port Agencies", "agent.demo@maritimer.test"],
+  ["Merchant", "Harbour Pilots & Tugs", "pilots.demo@maritimer.test"],
 ];
 
 function GoogleMark() {
@@ -30,6 +39,7 @@ function GoogleMark() {
 export default function SignIn({ error }) {
   const { signInGoogle, signInDev } = useAuth();
   const google = useAction(signInGoogle);
+  const demo = useAction((email) => signInWithDemoAccount(email, DEMO_PASSWORD));
   const [devEmail, setDevEmail] = useState("");
   return (
     <div className="center-page">
@@ -39,13 +49,27 @@ export default function SignIn({ error }) {
           <h1>Maritimer</h1>
         </div>
         <p className="muted">Port-call management for shipowners, port agents and local vendors: estimates, invoices, final accounts and settlement in one place.</p>
-        <ErrorAlert error={error || google.error} />
+        <ErrorAlert error={error || google.error || demo.error} />
         {firebaseEnabled ? (
           <Button variant="secondary" block busy={google.busy} onClick={() => google.run()}>
             <GoogleMark /> Continue with Google
           </Button>
         ) : (
           <Alert tone="warn">Google sign-in is not configured. Set the VITE_FIREBASE_* variables.</Alert>
+        )}
+        {firebaseEnabled && !devAuthEnabled && (
+          <div className="stack-sm">
+            <div className="divider" />
+            <div className="small strong">Try a demo account</div>
+            <div className="xs muted">Pre-filled demo companies with port calls at every stage. Password for all: <span className="mono">{DEMO_PASSWORD}</span></div>
+            <div className="stack-sm">
+              {DEMO_ACCOUNTS.map(([role, company, email]) => (
+                <Button key={email} variant="ghost" size="sm" busy={demo.busy} onClick={() => demo.run(email)} style={{ justifyContent: "flex-start" }}>
+                  {role} <span className="xs muted">{company} · {email}</span>
+                </Button>
+              ))}
+            </div>
+          </div>
         )}
         {import.meta.env.VITE_DEV_AUTH === "true" && devAuthEnabled && (
           <div className="stack-sm">

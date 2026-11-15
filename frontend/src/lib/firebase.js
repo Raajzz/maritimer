@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { GoogleAuthProvider, getAuth, onIdTokenChanged, signInWithPopup, signOut as fbSignOut } from "firebase/auth";
+import { GoogleAuthProvider, getAuth, onIdTokenChanged, signInWithEmailAndPassword, signInWithPopup, signOut as fbSignOut } from "firebase/auth";
 
 const config = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -26,6 +26,11 @@ export async function signInWithGoogle() {
   const provider = new GoogleAuthProvider();
   provider.setCustomParameters({ prompt: "select_account" });
   return signInWithPopup(auth, provider);
+}
+
+/** Shared demo accounts (email + password in Firebase). They can only see the demo companies' data. */
+export async function signInWithDemoAccount(email, password) {
+  return signInWithEmailAndPassword(auth, email, password);
 }
 
 export async function firebaseSignOut() {

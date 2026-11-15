@@ -118,20 +118,22 @@ def _demo_pdf(title, lines):
         return out
 
 
-def seed_demo(**kwargs):
-    """Demo data uses only the rates recorded below, so it is the same every time and needs no network.
+def seed_demo(*, live_fx=False, **kwargs):
+    """By default demo data uses only the rates recorded below, so it is the same every time and needs no network.
+    live_fx=True (for a shared production database) records no demo rates and fetches real market rates for
+    each transaction date instead, so the demo never adds made-up rates to the real rate history.
     Actions taken later in the running app fetch live market rates as usual."""
     from django.conf import settings
 
     previous = settings.FX_AUTO_FETCH
-    settings.FX_AUTO_FETCH = False
+    settings.FX_AUTO_FETCH = live_fx
     try:
-        return _seed_demo(**kwargs)
+        return _seed_demo(record_demo_rates=not live_fx, **kwargs)
     finally:
         settings.FX_AUTO_FETCH = previous
 
 
-def _seed_demo(*, admin_email, owner_email, agent_email, merchant_emails, stdout=None):
+def _seed_demo(*, admin_email, owner_email, agent_email, merchant_emails, name_suffix="", record_demo_rates=True, stdout=None):
     from apps.accounts import services as acc
     from apps.accounts.models import Organization, User
     from apps.chat.models import ChatThread
@@ -152,7 +154,7 @@ def _seed_demo(*, admin_email, owner_email, agent_email, merchant_emails, stdout
             stdout.write(msg)
 
     seed_masterdata(stdout)
-    if Organization.objects.filter(legal_name=DEMO_MARKER).exists():
+    if Organization.objects.filter(legal_name=DEMO_MARKER + name_suffix).exists():
         log("Demo data already present; nothing to do. (Run `manage.py flush` first to rebuild it.)")
         return
 
@@ -160,11 +162,12 @@ def _seed_demo(*, admin_email, owner_email, agent_email, merchant_emails, stdout
     admin, _ = acc.bootstrap_admin(email=admin_email, display_name="Demo Admin")
 
     # FX rates (INR→USD direct quotes, plus one USD→INR quote to show inverse handling)
-    for days, rate_value in ((45, "0.0107200000"), (20, "0.0106800000"), (8, "0.0106500000"), (1, "0.0106100000")):
-        record_fx_rate(actor=admin, base_currency_code="INR", quote_currency_code="USD", rate=rate_value,
-                       as_of=now - timedelta(days=days), source_reference="Demo rate (RBI reference)")
-    record_fx_rate(actor=admin, base_currency_code="SGD", quote_currency_code="USD", rate="0.7763000000", as_of=now - timedelta(days=20))
-    record_fx_rate(actor=admin, base_currency_code="USD", quote_currency_code="AED", rate="3.6725000000", as_of=now - timedelta(days=20))
+    if record_demo_rates:
+        for days, rate_value in ((45, "0.0107200000"), (20, "0.0106800000"), (8, "0.0106500000"), (1, "0.0106100000")):
+            record_fx_rate(actor=admin, base_currency_code="INR", quote_currency_code="USD", rate=rate_value,
+                           as_of=now - timedelta(days=days), source_reference="Demo rate (RBI reference)")
+        record_fx_rate(actor=admin, base_currency_code="SGD", quote_currency_code="USD", rate="0.7763000000", as_of=now - timedelta(days=20))
+        record_fx_rate(actor=admin, base_currency_code="USD", quote_currency_code="AED", rate="3.6725000000", as_of=now - timedelta(days=20))
 
     mumbai = Location.objects.get(name="Mumbai")
     singapore = Location.objects.get(name="Singapore")
@@ -173,7 +176,7 @@ def _seed_demo(*, admin_email, owner_email, agent_email, merchant_emails, stdout
     def org(type_, name, country, city, locations, ports, services=None, profile=None, **extra):
         return acc.admin_create_organization(
             actor=admin, type=type_,
-            organization={"legal_name": name, "country_code": country, "city": city, "email": f"ops@{name.split()[0].lower()}.example",
+            organization={"legal_name": name + name_suffix, "country_code": country, "city": city, "email": f"ops@{name.split()[0].lower()}.example",
                           "phone": "+91 22 5555 0100" if country == "IN" else "+65 6555 0100", "address_line1": extra.get("address", "1 Harbour Road")},
             profile=profile or {}, coverage={"location_ids": locations, "port_ids": ports, "service_category_ids": services or []},
         )
@@ -369,8 +372,8 @@ def _seed_demo(*, admin_email, owner_email, agent_email, merchant_emails, stdout
 
     # 8) A self-onboarded merchant waiting for admin review
     applicant = User.objects.create(email=f"applicant.{merchant_emails[0]}", display_name="New Vendor Applicant", firebase_uid=None)
-    acc.choose_role(user=applicant, role=Role.MERCHANT, legal_name="Gateway Launch Services", country_code="IN")
-    acc.update_organization(user=applicant, data={"legal_name": "Gateway Launch Services", "city": "Mumbai", "tax_id": "27ABCDE1234F1Z5"})
+    acc.choose_role(user=applicant, role=Role.MERCHANT, legal_name="Gateway Launch Services" + name_suffix, country_code="IN")
+    acc.update_organization(user=applicant, data={"legal_name": "Gateway Launch Services" + name_suffix, "city": "Mumbai", "tax_id": "27ABCDE1234F1Z5"})
     acc.update_coverage(user=applicant, port_ids=[_port("INBOM").pk], service_category_ids=[_svc("LAUNCH_SERVICE").pk])
     doc = store_bytes(data=_demo_pdf("Certificate of incorporation", [("Gateway Launch Services", "CIN U63090MH2019PTC000000")]),
                       filename="incorporation.pdf", content_type="application/pdf", purpose=FilePurpose.VERIFICATION, user=applicant)

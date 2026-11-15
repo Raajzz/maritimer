@@ -20,6 +20,16 @@ Every step is audited, and the PDA, FDA and settlement statement are generated a
 
 Live at **https://maritimer-sage.vercel.app** (API: https://maritimer-api.onrender.com/api/v1/health).
 
+**Try it without a Google account:** the sign-in page has one-click demo logins. Each one sees only its own demo company, with port calls at every stage.
+
+| Role | Email | Company |
+|---|---|---|
+| Owner | owner.demo@maritimer.test | Lion City Shipping Pte Ltd (Demo) |
+| Port agent | agent.demo@maritimer.test | Bombay Port Agencies Pvt Ltd (Demo) |
+| Merchant | pilots.demo@maritimer.test | Harbour Pilots & Tugs Pvt Ltd (Demo) |
+
+Password for all three: `MaritimerDemo2026`. It is public on purpose; these accounts hold demo data only.
+
 ```
 FEATURES.md          everything the application does, by area and role
 DEPLOYMENT_LOG.md    how this deployment was actually done (services, settings, checks, problems hit)
@@ -94,7 +104,7 @@ Local development accepts `Authorization: Bearer dev:<email>` so you can switch 
 | Merchant (supplies) | supplies.demo@maritimer.test |
 | Merchant (customs) | customs.demo@maritimer.test |
 
-In production, pass one real Google account per role: `seed_demo --owner-email … --agent-email …`. Google signs in the base account, so Gmail `+` aliases don't count as separate accounts. See DEPLOY.md §6.
+In production the demo was seeded with `seed_demo --admin-email <your admin> --name-suffix " (Demo)" --live-fx`: the suffix keeps demo companies apart from real ones, and `--live-fx` uses real ECB rates instead of fixed demo rates. The three demo logins are Firebase email/password accounts (the Email/Password provider is enabled in Firebase) whose uid is stored on the matching seeded user. You can also pass real Google accounts per role (`--owner-email … --agent-email …`); Gmail `+` aliases don't count as separate accounts. See DEPLOY.md §6.
 
 ## Tests
 
@@ -109,7 +119,7 @@ cd frontend && npm test                 # formatting helpers
 |---|---|
 | `bootstrap_admin --email you@gmail.com` | Create the first Admin (links on first Google sign-in) |
 | `seed_masterdata` | Countries, currencies, locations, ports, services, cargo types, request policies (idempotent) |
-| `seed_demo [--owner-email … --agent-email … --merchant-emails a,b,c --admin-email …]` | Demo data at every pipeline stage |
+| `seed_demo [--owner-email … --agent-email … --merchant-emails a,b,c --admin-email … --name-suffix " (Demo)" --live-fx]` | Demo data at every pipeline stage |
 | `expire_requests` | Expire overdue pending requests (schedule it) |
 
 ## Deploy
