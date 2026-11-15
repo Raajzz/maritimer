@@ -2,7 +2,7 @@ import { AlertTriangle, Inbox } from "lucide-react";
 import { Link } from "react-router-dom";
 
 import { PortCallItem } from "../../components/domain";
-import { Card, EmptyState, Kpi, Loader, Money, PageHeader } from "../../components/ui";
+import { Card, EmptyState, Kpi, Loader, Money, PageHeader, usePaged } from "../../components/ui";
 import { useAuth } from "../../hooks/useAuth";
 import { useResource } from "../../hooks/useResource";
 import { formatDate } from "../../lib/format";
@@ -18,6 +18,43 @@ const COLUMNS = [
 ];
 
 /** Agent dashboard: many concurrent port calls across owners as a status pipeline (flow 13). */
+function AttentionList({ items }) {
+  const [visible, pager] = usePaged(items, 5, { compact: true });
+  return (
+    <div className="stack-sm">
+      {visible.map((a) => (
+        <Link key={`${a.port_call.id}-${a.message}`} to={`/port-calls/${a.port_call.id}`} className="row-between small">
+          <span>{a.message}</span><span className="mono xs">{a.port_call.reference}</span>
+        </Link>
+      ))}
+      {pager}
+    </div>
+  );
+}
+
+/** One pipeline column; long columns page 5 cards at a time. */
+function PipelineColumn({ kind, label, items }) {
+  const [visible, pager] = usePaged(items, 5, { compact: true });
+  return (
+    <section className="col" aria-label={label}>
+      <div className="col-head"><span>{label}</span><span className="badge badge-primary">{items.length}</span></div>
+      <div className="col-body">
+        {kind === "requested"
+          ? visible.map((r) => (
+              <Link key={r.id} to={`/requests/${r.id}`} className="item">
+                <div className="small strong">{r.vessel?.name || r.subject}</div>
+                <div className="xs muted">{r.from_organization.legal_name}</div>
+                <div className="xs muted">{r.port?.name} · ETA {formatDate(r.eta)}</div>
+              </Link>
+            ))
+          : visible.map((pc) => <PortCallItem key={pc.id} pc={pc} compact />)}
+        {!items.length && <p className="xs muted" style={{ textAlign: "center", padding: 12 }}>Empty</p>}
+        {pager}
+      </div>
+    </section>
+  );
+}
+
 export default function AgentDashboard() {
   const { me } = useAuth();
   const dash = useResource("/dashboard", { pollMs: 60000 });
@@ -39,36 +76,11 @@ export default function AgentDashboard() {
             </div>
             {d.attention.length > 0 && (
               <Card title={<span className="row"><AlertTriangle size={18} color="var(--color-cta)" aria-hidden /> Needs attention</span>}>
-                <div className="stack-sm">
-                  {d.attention.map((a, i) => (
-                    <Link key={i} to={`/port-calls/${a.port_call.id}`} className="row-between small">
-                      <span>{a.message}</span><span className="mono xs">{a.port_call.reference}</span>
-                    </Link>
-                  ))}
-                </div>
+                <AttentionList items={d.attention} />
               </Card>
             )}
             <div className="pipeline" aria-label="Port call pipeline">
-              {COLUMNS.map(([key, label]) => {
-                const items = d.pipeline[key] || [];
-                return (
-                  <section key={key} className="col" aria-label={label}>
-                    <div className="col-head"><span>{label}</span><span className="badge badge-primary">{items.length}</span></div>
-                    <div className="col-body">
-                      {key === "requested"
-                        ? items.map((r) => (
-                            <Link key={r.id} to={`/requests/${r.id}`} className="item">
-                              <div className="small strong">{r.vessel?.name || r.subject}</div>
-                              <div className="xs muted">{r.from_organization.legal_name}</div>
-                              <div className="xs muted">{r.port?.name} · ETA {formatDate(r.eta)}</div>
-                            </Link>
-                          ))
-                        : items.map((pc) => <PortCallItem key={pc.id} pc={pc} compact />)}
-                      {!items.length && <p className="xs muted" style={{ textAlign: "center", padding: 12 }}>Empty</p>}
-                    </div>
-                  </section>
-                );
-              })}
+              {COLUMNS.map(([key, label]) => <PipelineColumn key={key} kind={key} label={label} items={d.pipeline[key] || []} />)}
             </div>
             {!Object.values(d.pipeline).some((v) => v.length) && <EmptyState icon={Inbox} title="No port calls yet">Requests from owners appear in the first column.</EmptyState>}
           </>

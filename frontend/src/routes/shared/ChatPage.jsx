@@ -1,14 +1,16 @@
 import { MessageSquare } from "lucide-react";
+import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
 import { ChatPanel } from "../../components/domain";
-import { Badge, Card, EmptyState, Loader, PageHeader } from "../../components/ui";
+import { Badge, Card, EmptyState, Loader, PageHeader, Pager } from "../../components/ui";
 import { useResource } from "../../hooks/useResource";
 import { relativeTime } from "../../lib/format";
 
 export default function ChatPage() {
   const { id } = useParams();
-  const threads = useResource("/chat/threads?page_size=100", { pollMs: 15000 });
+  const [page, setPage] = useState(1);
+  const threads = useResource(`/chat/threads?page_size=10&page=${page}`, { pollMs: 15000 });
   return (
     <div className="stack">
       <PageHeader title="Messages" sub="Owner ↔ agent per port call, agent ↔ merchant per service request." />
@@ -16,9 +18,9 @@ export default function ChatPage() {
         {id && <Card><ChatPanel key={id} threadId={id} /></Card>}
         <Card title="Conversations">
           <Loader resource={threads}>
-            {(page) => page.results.length ? (
+            {(data) => data.results.length ? (
               <div className="stack-sm">
-                {page.results.map((t) => (
+                {data.results.map((t) => (
                   <Link key={t.id} to={`/chat/${t.id}`} className="card card-link" style={{ padding: 12, borderColor: String(t.id) === id ? "var(--color-accent)" : undefined }}>
                     <div className="row-between">
                       <span className="small strong truncate" style={{ maxWidth: "75%" }}>{t.subject}</span>
@@ -28,6 +30,7 @@ export default function ChatPage() {
                     <div className="xs muted">{t.port_call.reference}{t.last_message_at ? ` · ${relativeTime(t.last_message_at)}` : ""}{t.is_closed ? " · closed" : ""}</div>
                   </Link>
                 ))}
+                <Pager data={data} page={page} onPage={setPage} pageSize={10} compact={Boolean(id)} />
               </div>
             ) : <EmptyState icon={MessageSquare} title="No conversations yet">Threads open automatically when a request is accepted.</EmptyState>}
           </Loader>

@@ -2,7 +2,7 @@ import { FileDown, Plus } from "lucide-react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
-import { Alert, Button, Card, CheckGroup, DataTable, EmptyState, ErrorAlert, Input, Loader, Modal, Money, Select, Stars, StatusBadge, Textarea } from "../../../components/ui";
+import { Alert, Button, Card, CheckGroup, DataTable, EmptyState, ErrorAlert, Input, Loader, Modal, Money, Pager, Select, Stars, StatusBadge, Textarea } from "../../../components/ui";
 import { useAction } from "../../../hooks/useAction";
 import { useResource } from "../../../hooks/useResource";
 import { api, openDocument, openFile, qs } from "../../../lib/api";
@@ -53,7 +53,7 @@ export function VendorsTab({ pc }) {
     <Card title="Vendor requests" actions={pc.allowed_actions.includes("vendor_request.create") && <Button icon={Plus} onClick={() => setOpen(true)}>Request a merchant</Button>}>
       <Loader resource={list}>
         {(rows) => (
-          <DataTable rows={rows} onRowClick={(r) => navigate(`/requests/${r.id}`)}
+          <DataTable rows={rows} pageSize={10} onRowClick={(r) => navigate(`/requests/${r.id}`)}
             empty={<EmptyState title="No vendor requests yet">Ask merchants for pilotage, tugs, water, provisions and more.</EmptyState>}
             columns={[
               { key: "reference", label: "Ref", render: (r) => <span className="mono">{r.reference}</span> },
@@ -72,12 +72,14 @@ export function VendorsTab({ pc }) {
 // ---- Invoices -----------------------------------------------------------------------------
 
 export function InvoicesTab({ pc }) {
-  const list = useResource(`/vendor-invoices?port_call_id=${pc.id}&page_size=100`);
+  const [pageNo, setPageNo] = useState(1);
+  const list = useResource(`/vendor-invoices?port_call_id=${pc.id}&page_size=10&page=${pageNo}`);
   const navigate = useNavigate();
   return (
     <Card title="Vendor invoices" actions={pc.allowed_actions.includes("invoice.create") && <Button icon={Plus} onClick={() => navigate(`/invoices/new?port_call=${pc.id}`)}>New invoice</Button>}>
       <Loader resource={list}>
         {(page) => (
+          <>
           <DataTable rows={page.results} onRowClick={(r) => navigate(`/invoices/${r.id}`)}
             empty={<EmptyState title="No invoices yet" />}
             columns={[
@@ -88,6 +90,8 @@ export function InvoicesTab({ pc }) {
               { key: "status", label: "Status", render: (r) => <StatusBadge status={r.status} /> },
               { key: "total", label: "Total", num: true, render: (r) => <Money value={r.total} /> },
             ]} />
+          <Pager data={page} page={pageNo} onPage={setPageNo} pageSize={10} />
+          </>
         )}
       </Loader>
     </Card>
@@ -173,7 +177,7 @@ export function PaymentsTab({ pc, onChanged }) {
         <ErrorAlert error={act.error} />
         <Loader resource={payments}>
           {(rows) => (
-            <DataTable rows={rows} empty={<EmptyState title="No payments yet" />}
+            <DataTable rows={rows} pageSize={10} empty={<EmptyState title="No payments yet" />}
               columns={[
                 { key: "reference", label: "Ref", render: (p) => <span className="mono">{p.reference}</span> },
                 { key: "kind", label: "Kind", render: (p) => humanize(p.kind) },
@@ -203,12 +207,14 @@ export function PaymentsTab({ pc, onChanged }) {
 // ---- Disputes, documents, rating -------------------------------------------------------------
 
 export function DisputesTab({ pc }) {
-  const list = useResource(`/disputes?port_call_id=${pc.id}&page_size=100`);
+  const [pageNo, setPageNo] = useState(1);
+  const list = useResource(`/disputes?port_call_id=${pc.id}&page_size=10&page=${pageNo}`);
   const navigate = useNavigate();
   return (
     <Card title="Disputes">
       <Loader resource={list}>
         {(page) => (
+          <>
           <DataTable rows={page.results} onRowClick={(d) => navigate(`/disputes/${d.id}`)}
             empty={<EmptyState title="No disputes">Owners can dispute individual FDA lines from the FDA tab.</EmptyState>}
             columns={[
@@ -218,6 +224,8 @@ export function DisputesTab({ pc }) {
               { key: "status", label: "Status", render: (d) => <StatusBadge status={d.status} /> },
               { key: "created", label: "Opened", render: (d) => formatDateTime(d.created_at) },
             ]} />
+          <Pager data={page} page={pageNo} onPage={setPageNo} pageSize={10} />
+          </>
         )}
       </Loader>
     </Card>
@@ -231,7 +239,7 @@ export function DocumentsTab({ pc }) {
       <p className="small muted" style={{ marginBottom: 12 }}>Issued and final PDAs, FDAs and settlement statements are generated once and kept unchanged. Accepted vendor invoices are listed with them.</p>
       <Loader resource={docs}>
         {(rows) => (
-          <DataTable rowKey="key" rows={rows.map((r, i) => ({ ...r, key: i }))} empty={<EmptyState title="No documents yet">Open a PDA or FDA PDF to generate it.</EmptyState>}
+          <DataTable rowKey="key" pageSize={10} rows={rows.map((r, i) => ({ ...r, key: i }))} empty={<EmptyState title="No documents yet">Open a PDA or FDA PDF to generate it.</EmptyState>}
             columns={[
               { key: "type", label: "Type", render: (d) => humanize(d.document_type) },
               { key: "reference", label: "Reference", render: (d) => <span className="mono">{d.reference}</span> },

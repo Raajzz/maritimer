@@ -52,7 +52,7 @@ function EntityTab({ entity }) {
       <ErrorAlert error={act.error} />
       <Loader resource={list}>
         {(rows) => (
-          <DataTable rowKey={cfg.key || "id"} rows={rows} columns={[
+          <DataTable rowKey={cfg.key || "id"} rows={rows} pageSize={15} columns={[
             ...cfg.columns.map(([key, label, render]) => ({ key, label, render })),
             { key: "active", label: "Active", render: (r) => <Badge tone={r.is_active ? "success" : "neutral"}>{r.is_active ? "Active" : "Inactive"}</Badge> },
             { key: "toggle", label: "", render: (r) => (
@@ -89,7 +89,7 @@ function PoliciesTab() {
       <ErrorAlert error={act.error} />
       <Loader resource={list}>
         {(rows) => (
-          <DataTable rows={rows} columns={[
+          <DataTable rows={rows} pageSize={15} columns={[
             { key: "type", label: "Request", render: (p) => humanize(p.request_type) },
             { key: "dir", label: "Direction", render: (p) => `${humanize(p.from_role)} → ${humanize(p.to_role)}` },
             { key: "on", label: "Status", render: (p) => <Badge tone={p.is_enabled ? "success" : "neutral"}>{p.is_enabled ? "Enabled" : "Disabled"}</Badge> },

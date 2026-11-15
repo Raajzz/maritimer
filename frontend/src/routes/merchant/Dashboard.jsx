@@ -1,7 +1,7 @@
 import { Inbox, MessageSquare } from "lucide-react";
 import { Link } from "react-router-dom";
 
-import { Card, EmptyState, Kpi, Loader, Money, PageHeader, StatusBadge } from "../../components/ui";
+import { Card, EmptyState, Kpi, Loader, Money, PageHeader, Paged, StatusBadge } from "../../components/ui";
 import { useAuth } from "../../hooks/useAuth";
 import { useResource } from "../../hooks/useResource";
 import { formatDate, formatMoney, humanize } from "../../lib/format";
@@ -24,20 +24,23 @@ export default function MerchantDashboard() {
             <div className="grid grid-2">
               <Card title="New requests" actions={<Link to="/requests" className="small">All</Link>}>
                 {d.incoming_requests.length ? (
+                  <Paged items={d.incoming_requests} pageSize={5}>{(rows) => (
                   <div className="stack-sm">
-                    {d.incoming_requests.map((r) => (
+                    {rows.map((r) => (
                       <Link key={r.id} to={`/requests/${r.id}`} className="card card-link" style={{ padding: 12 }}>
                         <div className="row-between"><span className="strong small">{r.subject}</span><StatusBadge status={r.status} /></div>
                         <div className="xs muted">{r.from_organization.legal_name} · {r.port_call?.reference} · {formatDate(r.created_at)}</div>
                       </Link>
                     ))}
                   </div>
+                  )}</Paged>
                 ) : <EmptyState icon={Inbox} title="No new requests" />}
               </Card>
               <Card title="Active jobs">
                 {d.active_jobs.length ? (
+                  <Paged items={d.active_jobs} pageSize={5}>{(rows) => (
                   <div className="stack-sm">
-                    {d.active_jobs.map((j) => (
+                    {rows.map((j) => (
                       <div key={j.request.id} className="card" style={{ padding: 12 }}>
                         <div className="row-between">
                           <Link to={`/requests/${j.request.id}`} className="strong small">{j.request.subject || j.request.reference}</Link>
@@ -51,6 +54,7 @@ export default function MerchantDashboard() {
                       </div>
                     ))}
                   </div>
+                  )}</Paged>
                 ) : <EmptyState title="No active jobs" />}
               </Card>
             </div>
@@ -62,14 +66,16 @@ export default function MerchantDashboard() {
             </Card>
             <Card title="Recent payments">
               {d.recent_payments.length ? (
+                <Paged items={d.recent_payments} pageSize={5}>{(rows) => (
                 <div className="stack-sm">
-                  {d.recent_payments.map((p) => (
+                  {rows.map((p) => (
                     <div key={p.id} className="row-between small">
                       <span>{p.payer.legal_name} · {formatDate(p.paid_at)} · {humanize(p.method)}</span>
                       <Money value={p.amount} />
                     </div>
                   ))}
                 </div>
+                )}</Paged>
               ) : <EmptyState title="No payments yet" />}
             </Card>
           </>

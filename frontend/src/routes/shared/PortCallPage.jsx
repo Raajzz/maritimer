@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 
 import { ChatPanel, Timeline } from "../../components/domain";
-import { Alert, Button, Card, DefinitionList, ErrorAlert, Input, Loader, Modal, Money, PageHeader, StatusBadge, Tabs, Textarea } from "../../components/ui";
+import { Alert, Button, Card, DefinitionList, ErrorAlert, Input, Loader, Modal, Money, PageHeader, Pager, StatusBadge, Tabs, Textarea } from "../../components/ui";
 import { useAction } from "../../hooks/useAction";
 import { useAuth } from "../../hooks/useAuth";
 import { useResource } from "../../hooks/useResource";
@@ -131,8 +131,15 @@ function Overview({ pc, onAction }) {
 }
 
 function TimelineTab({ pc }) {
-  const timeline = useResource(`/port-calls/${pc.id}/timeline?page_size=100`);
-  return <Card title="Timeline"><Loader resource={timeline}>{(page) => <Timeline entries={page.results} />}</Loader></Card>;
+  const [pageNo, setPageNo] = useState(1);
+  const timeline = useResource(`/port-calls/${pc.id}/timeline?page_size=20&page=${pageNo}`);
+  return (
+    <Card title="Timeline">
+      <Loader resource={timeline}>
+        {(page) => <><Timeline entries={page.results} /><Pager data={page} page={pageNo} onPage={setPageNo} pageSize={20} /></>}
+      </Loader>
+    </Card>
+  );
 }
 
 export default function PortCallPage() {

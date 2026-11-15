@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 
 import { Timeline } from "../../components/domain";
-import { Card, Kpi, Loader, PageHeader, StatusBadge } from "../../components/ui";
+import { Card, Kpi, Loader, PageHeader, Paged, StatusBadge } from "../../components/ui";
 import { useResource } from "../../hooks/useResource";
 import { humanize } from "../../lib/format";
 
@@ -19,7 +19,7 @@ export default function AdminDashboard() {
               <Kpi label="Documents to check" value={d.pending_documents} />
             </div>
             <div className="grid grid-main-side">
-              <Card title="Recent activity" actions={<Link to="/admin/audit" className="small">Audit log</Link>}><Timeline entries={d.recent_audit} /></Card>
+              <Card title="Recent activity" actions={<Link to="/admin/audit" className="small">Audit log</Link>}><Paged items={d.recent_audit} pageSize={8}>{(rows) => <Timeline entries={rows} />}</Paged></Card>
               <div className="stack">
                 <Card title="Users by role">
                   {Object.entries(d.users_by_role).map(([role, n]) => (

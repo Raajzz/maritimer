@@ -36,7 +36,7 @@ export default function AdminOrganizationDetail() {
                 ]} />
               </Card>
               <Card title="Members">
-                <DataTable rows={o.members} columns={[
+                <DataTable rows={o.members} pageSize={10} columns={[
                   { key: "email", label: "User", render: (m) => <Link to={`/admin/users/${m.id}`}>{m.display_name || m.email}</Link> },
                   { key: "status", label: "Status", render: (m) => <StatusBadge status={m.status} /> },
                   { key: "primary", label: "Primary", render: (m) => (m.is_primary_contact ? "Yes" : "") },

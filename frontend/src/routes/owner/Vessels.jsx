@@ -1,7 +1,7 @@
 import { Plus, Ship } from "lucide-react";
 import { useState } from "react";
 
-import { Button, Card, DataTable, EmptyState, ErrorAlert, Input, Loader, Modal, PageHeader, Select } from "../../components/ui";
+import { Button, Card, DataTable, EmptyState, ErrorAlert, Input, Loader, Modal, PageHeader, Pager, Select } from "../../components/ui";
 import { useAction } from "../../hooks/useAction";
 import { useResource } from "../../hooks/useResource";
 import { api } from "../../lib/api";
@@ -44,7 +44,8 @@ function VesselModal({ vessel, onClose, onSaved }) {
 }
 
 export default function Vessels() {
-  const vessels = useResource("/vessels?page_size=100");
+  const [pageNo, setPageNo] = useState(1);
+  const vessels = useResource(`/vessels?page=${pageNo}`);
   const [editing, setEditing] = useState(null);
   const remove = useAction(async (v) => {
     await api.del(`/vessels/${v.id}`);
@@ -58,6 +59,7 @@ export default function Vessels() {
       <Card>
         <Loader resource={vessels}>
           {(page) => (
+            <>
             <DataTable rows={page.results} empty={<EmptyState icon={Ship} title="No vessels yet" />}
               columns={[
                 { key: "name", label: "Name", render: (v) => <span className="strong">{v.name}</span> },
@@ -72,6 +74,8 @@ export default function Vessels() {
                   </div>
                 ) },
               ]} />
+            <Pager data={page} page={pageNo} onPage={setPageNo} />
+            </>
           )}
         </Loader>
       </Card>

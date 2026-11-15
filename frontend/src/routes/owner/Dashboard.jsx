@@ -2,7 +2,7 @@ import { Compass, Ship } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 
 import { PortCallItem, Timeline } from "../../components/domain";
-import { Badge, Button, Card, EmptyState, Kpi, Loader, PageHeader, StatusBadge } from "../../components/ui";
+import { Badge, Button, Card, EmptyState, Kpi, Loader, PageHeader, Paged, StatusBadge } from "../../components/ui";
 import { useAuth } from "../../hooks/useAuth";
 import { useResource } from "../../hooks/useResource";
 import { formatDate } from "../../lib/format";
@@ -39,8 +39,9 @@ export default function OwnerDashboard() {
                 <div className="stack">
                   <Card title="Needs your action">
                     {d.pending_actions.length ? (
+                      <Paged items={d.pending_actions} pageSize={5}>{(rows) => (
                       <div className="stack-sm">
-                        {d.pending_actions.map((a, i) => {
+                        {rows.map((a, i) => {
                           const [label, tab] = ACTION_LABELS[a.type] || [a.type, "overview"];
                           return (
                             <Link key={`${a.type}-${a.port_call.id}-${i}`} to={`/port-calls/${a.port_call.id}?tab=${tab}`} className="card card-link row-between" style={{ padding: 12 }}>
@@ -50,35 +51,40 @@ export default function OwnerDashboard() {
                           );
                         })}
                       </div>
+                      )}</Paged>
                     ) : <EmptyState title="You're all caught up" />}
                   </Card>
                   <Card title="Fleet" actions={<Link to="/vessels" className="small">Manage vessels</Link>}>
                     {d.vessels.length ? (
+                      <Paged items={d.vessels} pageSize={6}>{(rows) => (
                       <div className="grid grid-2">
-                        {d.vessels.map(({ vessel, active_call }) => active_call ? <PortCallItem key={vessel.id} pc={active_call} /> : (
+                        {rows.map(({ vessel, active_call }) => active_call ? <PortCallItem key={vessel.id} pc={active_call} /> : (
                           <div key={vessel.id} className="card" style={{ padding: 12 }}>
                             <div className="row"><Ship size={16} aria-hidden color="var(--color-muted)" /><span className="strong">{vessel.name}</span></div>
                             <div className="small muted">No active port call</div>
                           </div>
                         ))}
                       </div>
+                      )}</Paged>
                     ) : <EmptyState icon={Ship} title="No vessels yet"><Link to="/vessels">Add your first vessel</Link></EmptyState>}
                   </Card>
                 </div>
                 <div className="stack">
                   <Card title="Recent requests" actions={<Link to="/requests" className="small">All</Link>}>
                     {d.outgoing_requests.length ? (
+                      <Paged items={d.outgoing_requests} pageSize={6}>{(rows) => (
                       <div className="stack-sm">
-                        {d.outgoing_requests.slice(0, 6).map((r) => (
+                        {rows.map((r) => (
                           <Link key={r.id} to={`/requests/${r.id}`} className="row-between small">
                             <span className="truncate" style={{ maxWidth: "65%" }}>{r.subject || r.reference}<span className="xs muted"> · {formatDate(r.created_at)}</span></span>
                             <StatusBadge status={r.status} />
                           </Link>
                         ))}
                       </div>
+                      )}</Paged>
                     ) : <EmptyState title="No requests yet" />}
                   </Card>
-                  <Card title="Recent activity"><Timeline entries={d.recent_activity.slice(0, 8)} /></Card>
+                  <Card title="Recent activity"><Paged items={d.recent_activity} pageSize={8}>{(rows) => <Timeline entries={rows} />}</Paged></Card>
                 </div>
               </div>
             </>

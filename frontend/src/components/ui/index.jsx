@@ -1,5 +1,5 @@
 import { Inbox, Star, X } from "lucide-react";
-import { useEffect, useId } from "react";
+import { useEffect, useId, useState } from "react";
 
 import { formatMoney, humanize, statusTone } from "../../lib/format";
 
@@ -229,9 +229,12 @@ export function Stars({ value }) {
 }
 
 /** Responsive table: columns [{key, label, render, num}] — stacks into cards below 640px. */
-export function DataTable({ columns, rows, onRowClick, rowKey = "id", empty, footer }) {
+/** `pageSize` pages a plain array on the client; server-paginated lists use <Pager> instead. */
+export function DataTable({ columns, rows, onRowClick, rowKey = "id", empty, footer, pageSize }) {
+  const [visible, pager] = usePaged(rows || [], pageSize);
   if (!rows?.length) return empty || <EmptyState title="Nothing here yet" />;
   return (
+    <>
     <div className="table-wrap">
       <table className="table responsive">
         <thead>
@@ -244,7 +247,7 @@ export function DataTable({ columns, rows, onRowClick, rowKey = "id", empty, foo
           </tr>
         </thead>
         <tbody>
-          {rows.map((row) => (
+          {visible.map((row) => (
             <tr key={row[rowKey]} className={onRowClick ? "clickable" : ""} onClick={onRowClick ? () => onRowClick(row) : undefined}>
               {columns.map((c) => (
                 <td key={c.key} data-label={c.label} className={c.num ? "num" : ""}>
@@ -257,22 +260,53 @@ export function DataTable({ columns, rows, onRowClick, rowKey = "id", empty, foo
         {footer && <tfoot>{footer}</tfoot>}
       </table>
     </div>
+    {pager}
+    </>
   );
 }
 
-export function Pager({ data, page, onPage }) {
-  if (!data || (!data.next && !data.previous)) return null;
+function PagerBar({ page, pages, total, hasPrev, hasNext, onPage, compact }) {
   return (
-    <div className="row" style={{ justifyContent: "center", marginTop: 12 }}>
-      <Button variant="secondary" size="sm" disabled={!data.previous} onClick={() => onPage(page - 1)}>
-        Previous
+    <div className="pager" style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "center", gap: 8, marginTop: compact ? 8 : 12 }}>
+      <Button variant="secondary" size="sm" disabled={!hasPrev} onClick={() => onPage(page - 1)} aria-label="Previous page">
+        {compact ? "‹" : "Previous"}
       </Button>
-      <span className="small muted">Page {page}</span>
-      <Button variant="secondary" size="sm" disabled={!data.next} onClick={() => onPage(page + 1)}>
-        Next
+      <span className="small muted" style={{ fontVariantNumeric: "tabular-nums" }}>
+        {compact ? `${page} / ${pages}` : `Page ${page} of ${pages}`}{!compact && total != null ? ` · ${total} total` : ""}
+      </span>
+      <Button variant="secondary" size="sm" disabled={!hasNext} onClick={() => onPage(page + 1)} aria-label="Next page">
+        {compact ? "›" : "Next"}
       </Button>
     </div>
   );
+}
+
+/** Pager for server-paginated responses ({count, next, previous, results}); 25 per page by default. */
+export function Pager({ data, page, onPage, pageSize = 25, compact = false }) {
+  if (!data || (!data.next && !data.previous)) return null;
+  const pages = Math.max(1, Math.ceil((data.count ?? 0) / pageSize));
+  return <PagerBar page={page} pages={pages} total={data.count} hasPrev={Boolean(data.previous)} hasNext={Boolean(data.next)} onPage={onPage} compact={compact} />;
+}
+
+/** Client-side paging for a plain array. Returns [visible items, pager element or null]. */
+export function usePaged(items, pageSize, { compact = false } = {}) {
+  const [page, setPage] = useState(1);
+  const list = items || [];
+  const pages = pageSize ? Math.max(1, Math.ceil(list.length / pageSize)) : 1;
+  const current = Math.min(page, pages);
+  useEffect(() => {
+    if (page !== current) setPage(current);
+  }, [page, current]);
+  if (!pageSize || list.length <= pageSize) return [list, null];
+  const visible = list.slice((current - 1) * pageSize, current * pageSize);
+  const bar = <PagerBar page={current} pages={pages} total={list.length} hasPrev={current > 1} hasNext={current < pages} onPage={setPage} compact={compact} />;
+  return [visible, bar];
+}
+
+/** Render-prop form of usePaged, for lists drawn inside callbacks: <Paged items={xs} pageSize={5}>{(page) => …}</Paged>. */
+export function Paged({ items, pageSize, compact = true, children }) {
+  const [visible, pager] = usePaged(items, pageSize, { compact });
+  return <>{children(visible)}{pager}</>;
 }
 
 export function DefinitionList({ items }) {
